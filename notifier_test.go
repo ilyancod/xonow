@@ -3,7 +3,7 @@ package main
 import (
 	"reflect"
 	"testing"
-	"xonow/data"
+	data "xonow/internal/datastore"
 
 	"github.com/ilyancod/goqstat"
 )

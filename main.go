@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"strconv"
 	"time"
-	"xonow/data"
+	"xonow/internal/datastore"
 
 	"github.com/ilyancod/goqstat"
 )
 
 func main() {
 	ReadConfig()
+	store := datastore.GetDataStore()
 	for {
 		servers := []string{}
 		for server := range ConfigData.Servers {
@@ -21,7 +22,8 @@ func main() {
 			fmt.Println(err)
 		}
 
-		dataChanges, _ := data.SetData(&result)
+		serverData := datastore.GoqstatToDataServers(&result)
+		dataChanges := store.UpdateServerData(serverData)
 
 		RunNotifier(dataChanges)
 		time.Sleep(time.Second * 5)

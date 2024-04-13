@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-	"xonow/data"
+	data "xonow/internal/datastore"
 )
 
 // type NotifyResult struct {
