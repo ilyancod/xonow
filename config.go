@@ -30,7 +30,7 @@ func (n Notifications) Empty() bool {
 }
 
 func ReadConfig() {
-	file, err := os.Open("/home/ilya/projects/go/src/github.com/ilyancod/xonow/config.json")
+	file, err := os.Open("./config/config.json")
 	if err != nil {
 		fmt.Println("Ошибка чтения конфига:", err)
 		return
