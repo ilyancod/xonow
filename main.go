@@ -12,6 +12,9 @@ import (
 func main() {
 	ReadConfig()
 	store := datastore.GetDataStore()
+	for serverAddress := range ConfigData.Servers {
+		store.AddServer(datastore.ServerAddr(serverAddress), datastore.ServerPayload{})
+	}
 	for {
 		servers := []string{}
 		for server := range ConfigData.Servers {

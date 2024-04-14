@@ -48,17 +48,17 @@ func TestConfigToNotifierSettings(t *testing.T) {
 func TestGetNotifyResult(t *testing.T) {
 	notifierSettings := configToNotifierSettings(config)
 	t.Run("empty changes", func(t *testing.T) {
-		got := getNotifyResult(data.DataChanges{}, notifierSettings)
+		got := getNotifyResult(data.ServerChanges{}, notifierSettings)
 		assertLen(t, len(got), 0)
-		got = getNotifyResult(data.DataChanges{
-			"address": data.DataProperties{},
+		got = getNotifyResult(data.ServerChanges{
+			"address": data.ServerProperties{},
 		}, notifierSettings)
 		assertLen(t, len(got), 0)
 	})
 }
 
 func TestGetNotifyValue(t *testing.T) {
-	changesProperties := data.DataProperties{
+	changesProperties := data.ServerProperties{
 		"Map":  "test",
 		"Ping": 51,
 	}
@@ -68,14 +68,14 @@ func TestGetNotifyValue(t *testing.T) {
 	}
 	t.Run("empty notify value expected", func(t *testing.T) {
 		want := NotifyValue{}
-		got := getNotifyValue(data.DataProperties{}, notifConfig1)
+		got := getNotifyValue(data.ServerProperties{}, notifConfig1)
 		assertStruct(t, got, want)
 
 		got = getNotifyValue(changesProperties, notifConfig1)
 		assertStruct(t, got, want)
 	})
 	t.Run("maps appear", func(t *testing.T) {
-		changes := data.DataProperties{
+		changes := data.ServerProperties{
 			"Map":  "mars",
 			"Ping": 51,
 		}

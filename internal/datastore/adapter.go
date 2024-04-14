@@ -6,8 +6,8 @@ import (
 	"github.com/ilyancod/goqstat"
 )
 
-func GoqstatToDataServers(new *[]goqstat.Server) ServerData {
-	newDataMap := make(ServerData)
+func GoqstatToDataServers(new *[]goqstat.Server) ServerStore {
+	newDataMap := make(ServerStore)
 	for _, server := range *new {
 		if !checkServerPlayersValid(server) {
 			continue

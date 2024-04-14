@@ -41,7 +41,7 @@ var goqstat_server2 = goqstat.Server{
 	Rules:         goqstat.Rules{},
 }
 
-func TestServersToDataMap(t *testing.T) {
+func TestGoqstatToDataServers(t *testing.T) {
 	servers := []goqstat.Server{goqstat_server1, goqstat_server2}
 	t.Run("valid Servers", func(t *testing.T) {
 		dataMap := GoqstatToDataServers(&servers)

@@ -1,7 +1,6 @@
 package datastore
 
 import (
-	"encoding/json"
 	"sync"
 
 	"github.com/ilyancod/goqstat"
@@ -10,38 +9,27 @@ import (
 type ServerAddr string
 type PropertyName string
 
-type DataStore struct {
-	serverData ServerData
-}
-
-type ServerData map[ServerAddr]ServerPayload
-
-type ServerPayload struct {
-	Address ServerAddr
-	Name    string
-	Map     string
-	Ping    int
-	Bots    int
-	Players Players
+type dataStore struct {
+	serverData ServerStore
 }
 
 type Players []goqstat.Player
 
-var singleDataStore *DataStore
+var singleDataStore *dataStore
 var lock = &sync.Mutex{}
 
-func GetDataStore() *DataStore {
+func GetDataStore() *dataStore {
 	if singleDataStore == nil {
 		lock.Lock()
 		defer lock.Unlock()
-		singleDataStore = &DataStore{
-			serverData: make(ServerData),
+		singleDataStore = &dataStore{
+			serverData: make(ServerStore),
 		}
 	}
 	return singleDataStore
 }
 
-func (ds *DataStore) UpdateServerData(serverData ServerData) DataChanges {
+func (ds *dataStore) UpdateServerData(serverData ServerStore) ServerChanges {
 	changes := getChanges(ds.serverData, serverData)
 
 	for _, data := range serverData {
@@ -51,9 +39,12 @@ func (ds *DataStore) UpdateServerData(serverData ServerData) DataChanges {
 	return changes
 }
 
-func (d ServerPayload) String() string {
-	jsonBytes, _ := json.MarshalIndent(d, "", "    ")
-	return string(jsonBytes)
+func (ds *dataStore) AddServer(address ServerAddr, payload ServerPayload) {
+	ds.serverData.Add(address, payload)
+}
+
+func (ds *dataStore) RemoveServer(address ServerAddr) {
+	ds.serverData.Remove(address)
 }
 
 func (p Players) ContainsName(name string) bool {

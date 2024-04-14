@@ -54,8 +54,9 @@ func configToNotifierSettings(config Config) NotifierSettings {
 	}
 }
 
-func RunNotifier(changes data.DataChanges) {
+func RunNotifier(changes data.ServerChanges) {
 	notifyResults := getNotifyResult(changes, settings)
+	fmt.Println("notifyResult: ", notifyResults)
 	for serverAddr, notifyValue := range notifyResults {
 		for configName, configValue := range notifyValue {
 			title := "Xonow: changes on the server " + string(serverAddr)
@@ -75,11 +76,10 @@ func RunNotifier(changes data.DataChanges) {
 			}
 		}
 	}
-	fmt.Println("notifyResult: ", notifyResults)
 
 }
 
-func getNotifyResult(changes data.DataChanges, ns NotifierSettings) NotifyResult {
+func getNotifyResult(changes data.ServerChanges, ns NotifierSettings) NotifyResult {
 	notifyResult := NotifyResult{}
 	for serverAddr, properties := range changes {
 		notifyValue := getNotifyValue(properties, ns.Global)
@@ -90,7 +90,7 @@ func getNotifyResult(changes data.DataChanges, ns NotifierSettings) NotifyResult
 	return notifyResult
 }
 
-func getNotifyValue(properties data.DataProperties, notification Notifications) NotifyValue {
+func getNotifyValue(properties data.ServerProperties, notification Notifications) NotifyValue {
 	result := NotifyValue{}
 	for name, value := range properties {
 		switch name {

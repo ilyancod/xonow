@@ -4,27 +4,28 @@ import (
 	"reflect"
 )
 
-type DataChanges map[ServerAddr]DataProperties
-type DataProperties map[PropertyName]interface{}
+type ServerChanges map[ServerAddr]ServerProperties
+type ServerProperties map[PropertyName]interface{}
 type PlayersChanges struct {
 	Added   Players
 	Removed Players
 }
 
-func getChanges(first, second ServerData) DataChanges {
-	dataChanges := DataChanges{}
-	for _, firstData := range first {
-		secondData := second[firstData.Address]
+func getChanges(first, second ServerStore) ServerChanges {
+	dataChanges := ServerChanges{}
+	for serverAddr, firstData := range first {
+		secondData := second[serverAddr]
 		changes := getChangesData(firstData, secondData)
+
 		if len(changes) != 0 {
-			dataChanges[firstData.Address] = changes
+			dataChanges[serverAddr] = changes
 		}
 	}
 	return dataChanges
 }
 
-func getChangesData(first, second ServerPayload) DataProperties {
-	changes := DataProperties{}
+func getChangesData(first, second ServerPayload) ServerProperties {
+	changes := ServerProperties{}
 	t := reflect.TypeOf(first)
 	for i := 0; i < t.NumField(); i++ {
 		propertyName := PropertyName(t.Field(i).Name)

@@ -29,7 +29,7 @@ var (
 
 func TestGetChanges(t *testing.T) {
 	t.Run("equal data", func(t *testing.T) {
-		first := ServerData{
+		first := ServerStore{
 			serverPayload1.Address: serverPayload1,
 			serverPayload2.Address: serverPayload2,
 		}
@@ -39,9 +39,16 @@ func TestGetChanges(t *testing.T) {
 	})
 	t.Run("no equal data", func(t *testing.T) {
 		data := serverPayload1
-		first := ServerData{data.Address: data}
+		first := ServerStore{data.Address: data}
 		data.Map = "loo"
-		second := ServerData{data.Address: data}
+		second := ServerStore{data.Address: data}
+		got := getChanges(first, second)
+		assertLen(t, len(got), 1)
+	})
+	t.Run("empty data", func(t *testing.T) {
+		first := ServerStore{serverPayload1.Address: ServerPayload{}}
+		second := ServerStore{serverPayload1.Address: serverPayload1}
+
 		got := getChanges(first, second)
 		assertLen(t, len(got), 1)
 	})
@@ -100,6 +107,16 @@ func TestGetChangesData(t *testing.T) {
 		changesPlayers, found := got["Players"]
 		assertPlayers(t, found, changesPlayers.(PlayersChanges), want)
 	})
+
+	t.Run("no equal Data (server)", func(t *testing.T) {
+		firstData.Address = ""
+		secondData.Address = ServerAddr(goqstat_server2.Address)
+		got := getChangesData(firstData, secondData)
+
+		changesAddress, found := got["Address"]
+
+		assertData(t, found, changesAddress, secondData.Address)
+	})
 }
 
 func TestGetChangesPlayers(t *testing.T) {
@@ -150,6 +167,13 @@ func assertLen(t testing.TB, got, want int) {
 
 	if got != want {
 		t.Errorf("got %v len, want %v", got, want)
+	}
+}
+
+func assertData(t testing.TB, found bool, got, want any) {
+	t.Helper()
+	if !found || got != want {
+		t.Errorf("got %v want %v", got, want)
 	}
 }
 
