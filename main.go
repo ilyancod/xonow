@@ -1,23 +1,32 @@
-package main // Xonotic Now
+package main
 
 import (
 	"fmt"
 	"strconv"
 	"time"
+	"xonow/internal/config"
 	"xonow/internal/datastore"
+	"xonow/internal/notification"
 
 	"github.com/ilyancod/goqstat"
 )
 
 func main() {
-	ReadConfig()
+	conf := config.GetConfig()
+	err := conf.ReadFromFile("./config/config.json")
+	if err != nil {
+		fmt.Println("error opening the config: ", err)
+		return
+	}
+
 	store := datastore.GetDataStore()
-	for serverAddress := range ConfigData.Servers {
+	for serverAddress := range conf.Servers {
 		store.AddServer(datastore.ServerAddr(serverAddress), datastore.ServerPayload{})
 	}
+	notification.SetNotifierSettings(conf.Global)
 	for {
-		servers := []string{}
-		for server := range ConfigData.Servers {
+		var servers []string
+		for server := range conf.Servers {
 			servers = append(servers, server)
 		}
 		result, err := goqstat.GetXonotics(servers...)
@@ -28,7 +37,7 @@ func main() {
 		serverData := datastore.GoqstatToDataServers(&result)
 		dataChanges := store.UpdateServerData(serverData)
 
-		RunNotifier(dataChanges)
+		notification.RunNotifier(dataChanges)
 		time.Sleep(time.Second * 5)
 	}
 }

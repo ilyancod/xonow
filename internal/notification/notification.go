@@ -1,4 +1,4 @@
-package main
+package notification
 
 import (
 	"github.com/gen2brain/beeep"

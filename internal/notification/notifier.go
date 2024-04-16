@@ -1,9 +1,10 @@
-package main
+package notification
 
 import (
 	"fmt"
 	"reflect"
 	"strings"
+	"xonow/internal/config"
 	data "xonow/internal/datastore"
 )
 
@@ -33,24 +34,24 @@ type ConfigName string
 type ConfigValue []string
 
 type NotifierSettings struct {
-	Global  Notifications
-	Servers map[data.ServerAddr]Notifications
+	Global  config.Notifications
+	Servers map[data.ServerAddr]config.Notifications
 }
 
-func SetNotifierSettings(config Config) {
-	settings = configToNotifierSettings(config)
-	// settings.Global = config.Global.Notifications
+func SetNotifierSettings(conf config.Global) {
+	settings = configToNotifierSettings(conf)
+	// settings.Global = conf.Global.Notifications
 
 	// serverMap := map[data.ServerAddr]Notifications{}
-	// for serverAddr, server := range config.Servers {
+	// for serverAddr, server := range conf.Servers {
 	// 	server[serverAddr] = server.Notifications
 	// }
 	// notifierSettings = n
 }
 
-func configToNotifierSettings(config Config) NotifierSettings {
+func configToNotifierSettings(conf config.Global) NotifierSettings {
 	return NotifierSettings{
-		Global: config.Global.Notifications,
+		Global: conf.Notifications,
 	}
 }
 
@@ -90,7 +91,7 @@ func getNotifyResult(changes data.ServerChanges, ns NotifierSettings) NotifyResu
 	return notifyResult
 }
 
-func getNotifyValue(properties data.ServerProperties, notification Notifications) NotifyValue {
+func getNotifyValue(properties data.ServerProperties, notification config.Notifications) NotifyValue {
 	result := NotifyValue{}
 	for name, value := range properties {
 		switch name {
