@@ -23,7 +23,7 @@ func main() {
 	for serverAddress := range conf.Servers {
 		store.AddServer(datastore.ServerAddr(serverAddress), datastore.ServerPayload{})
 	}
-	notification.SetNotifierSettings(conf.Global)
+	notificationSettings := notification.NewNotifierSettings(conf)
 	for {
 		var servers []string
 		for server := range conf.Servers {
@@ -37,7 +37,9 @@ func main() {
 		serverData := datastore.GoqstatToDataServers(&result)
 		dataChanges := store.UpdateServerData(serverData)
 
-		notification.RunNotifier(dataChanges)
+		notifyChanges := notification.NewNotifyChanges(dataChanges, notificationSettings)
+
+		notification.RunNotifier(notifyChanges)
 		time.Sleep(time.Second * 5)
 	}
 }
