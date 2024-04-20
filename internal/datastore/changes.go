@@ -11,11 +11,11 @@ type PlayersChanges struct {
 	Removed Players
 }
 
-func getChanges(first, second ServerStore) ServerChanges {
+func getServerChanges(first, second ServerStore) ServerChanges {
 	dataChanges := ServerChanges{}
 	for serverAddr, firstData := range first {
 		secondData := second[serverAddr]
-		changes := getChangesData(firstData, secondData)
+		changes := getServerPropertiesChanges(firstData, secondData)
 
 		if len(changes) != 0 {
 			dataChanges[serverAddr] = changes
@@ -24,7 +24,7 @@ func getChanges(first, second ServerStore) ServerChanges {
 	return dataChanges
 }
 
-func getChangesData(first, second ServerPayload) ServerProperties {
+func getServerPropertiesChanges(first, second ServerPayload) ServerProperties {
 	changes := ServerProperties{}
 	t := reflect.TypeOf(first)
 	for i := 0; i < t.NumField(); i++ {
@@ -32,7 +32,7 @@ func getChangesData(first, second ServerPayload) ServerProperties {
 		firstValue := reflect.ValueOf(first).Field(i).Interface()
 		secondValue := reflect.ValueOf(second).Field(i).Interface()
 
-		changedProperty, found := getChangesProperty(propertyName, firstValue, secondValue)
+		changedProperty, found := getAnyPropertyChanges(propertyName, firstValue, secondValue)
 		if found {
 			changes[propertyName] = changedProperty
 		}
@@ -40,9 +40,9 @@ func getChangesData(first, second ServerPayload) ServerProperties {
 	return changes
 }
 
-func getChangesProperty(propertyName PropertyName, firstValue, secondValue any) (any, bool) {
+func getAnyPropertyChanges(propertyName PropertyName, firstValue, secondValue any) (any, bool) {
 	if propertyName == "Players" {
-		playersChanges := getChangesPlayers(firstValue.(Players), secondValue.(Players))
+		playersChanges := getPlayersChanges(firstValue.(Players), secondValue.(Players))
 		if !playersChanges.Empty() {
 			return playersChanges, true
 		}
@@ -54,7 +54,7 @@ func getChangesProperty(propertyName PropertyName, firstValue, secondValue any) 
 	return nil, false
 }
 
-func getChangesPlayers(first, second Players) PlayersChanges {
+func getPlayersChanges(first, second Players) PlayersChanges {
 	changes := PlayersChanges{Players{}, Players{}}
 	for _, player := range first {
 		if !second.ContainsName(player.Name) {
@@ -67,11 +67,6 @@ func getChangesPlayers(first, second Players) PlayersChanges {
 		}
 	}
 	return changes
-}
-
-func (pc PlayersChanges) Equal(other PlayersChanges) bool {
-	return reflect.DeepEqual(pc.Added, other.Added) &&
-		reflect.DeepEqual(pc.Removed, other.Removed)
 }
 
 func (pc PlayersChanges) Empty() bool {

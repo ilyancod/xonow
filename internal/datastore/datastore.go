@@ -30,7 +30,7 @@ func GetDataStore() *dataStore {
 }
 
 func (ds *dataStore) UpdateServerData(serverData ServerStore) ServerChanges {
-	changes := getChanges(ds.serverData, serverData)
+	changes := getServerChanges(ds.serverData, serverData)
 
 	for _, data := range serverData {
 		ds.serverData[data.Address] = data

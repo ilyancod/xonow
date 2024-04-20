@@ -166,3 +166,27 @@ func TestGetBotsFromString(t *testing.T) {
 		})
 	}
 }
+
+func assertBool(t testing.TB, got, want bool) {
+	t.Helper()
+
+	if got != want {
+		t.Errorf("got %v want %v", got, want)
+	}
+}
+
+func assertStrings(t testing.TB, got, want string) {
+	t.Helper()
+
+	if got != want {
+		t.Errorf("got %v want %v", got, want)
+	}
+}
+
+func assertLen(t testing.TB, got, want int) {
+	t.Helper()
+
+	if got != want {
+		t.Errorf("got %v len, want %v", got, want)
+	}
+}

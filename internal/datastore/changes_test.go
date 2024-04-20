@@ -1,6 +1,7 @@
 package datastore
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/ilyancod/goqstat"
@@ -27,34 +28,63 @@ var (
 	player4 = goqstat.Player{Name: "player4", Ping: 40}
 )
 
-func TestGetChanges(t *testing.T) {
-	t.Run("equal data", func(t *testing.T) {
-		first := ServerStore{
-			serverPayload1.Address: serverPayload1,
-			serverPayload2.Address: serverPayload2,
-		}
-		second := first
-		got := getChanges(first, second)
-		assertLen(t, len(got), 0)
-	})
-	t.Run("no equal data", func(t *testing.T) {
-		data := serverPayload1
-		first := ServerStore{data.Address: data}
-		data.Map = "loo"
-		second := ServerStore{data.Address: data}
-		got := getChanges(first, second)
-		assertLen(t, len(got), 1)
-	})
-	t.Run("empty data", func(t *testing.T) {
-		first := ServerStore{serverPayload1.Address: ServerPayload{}}
-		second := ServerStore{serverPayload1.Address: serverPayload1}
+func TestGetServerChanges(t *testing.T) {
+	serverPayloadChanged := serverPayload1
+	serverPayloadChanged.Map = "loo"
 
-		got := getChanges(first, second)
-		assertLen(t, len(got), 1)
-	})
+	serverStore1 := ServerStore{
+		serverPayload1.Address: serverPayload1,
+		serverPayload2.Address: serverPayload2,
+	}
+	serverStore2 := ServerStore{
+		serverPayload1.Address: serverPayloadChanged,
+		serverPayload2.Address: serverPayload2,
+	}
+	serverStoreEmptyPayload := ServerStore{
+		serverPayload1.Address: ServerPayload{},
+	}
+
+	cases := []struct {
+		name         string
+		firstServer  ServerStore
+		secondServer ServerStore
+		wantLength   int
+	}{
+		{
+			name:         "empty ServerStore",
+			firstServer:  ServerStore{},
+			secondServer: ServerStore{},
+			wantLength:   0,
+		},
+		{
+			name:         "ServerStore with empty payload",
+			firstServer:  serverStoreEmptyPayload,
+			secondServer: serverStore1,
+			wantLength:   1,
+		},
+		{
+			name:         "equal ServerStore",
+			firstServer:  serverStore1,
+			secondServer: serverStore1,
+			wantLength:   0,
+		},
+		{
+			name:         "no equal ServerStore",
+			firstServer:  serverStore1,
+			secondServer: serverStore2,
+			wantLength:   1,
+		},
+	}
+
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			got := getServerChanges(test.firstServer, test.secondServer)
+			assertLen(t, len(got), test.wantLength)
+		})
+	}
 }
 
-func TestGetChangesData(t *testing.T) {
+func TestGetServerPropertiesChanges(t *testing.T) {
 	firstData := ServerPayload{
 		Address: ServerAddr(goqstat_server1.Address),
 		Name:    goqstat_server1.Name,
@@ -63,123 +93,118 @@ func TestGetChangesData(t *testing.T) {
 		Bots:    0,
 		Players: Players{},
 	}
-	secondData := firstData
-	t.Run("equal Data", func(t *testing.T) {
-		got := getChangesData(firstData, secondData)
-		assertLen(t, len(got), 0)
-	})
-	t.Run("no equal Data (map, ping, bots)", func(t *testing.T) {
-		assertData := func(t testing.TB, found bool, got, want any) {
-			t.Helper()
-			if !found || got != want {
-				t.Errorf("got %v want %v", got, want)
-			}
-		}
-		secondData := firstData
-		secondData.Map = "snooker"
-		secondData.Ping = 73
-		secondData.Bots = 3
-		got := getChangesData(firstData, secondData)
 
-		assertLen(t, len(got), 3)
+	cases := []struct {
+		name   string
+		first  ServerPayload
+		second ServerPayload
+		want   ServerProperties
+	}{
+		{
+			name:   "equal ServerPayload",
+			first:  firstData,
+			second: firstData,
+			want:   ServerProperties{},
+		},
+		{
+			name:  "no equal ServerPayload (map, ping, bots)",
+			first: firstData,
+			second: ServerPayload{
+				Address: ServerAddr(goqstat_server1.Address),
+				Name:    goqstat_server1.Name,
+				Map:     "snooker",
+				Ping:    73,
+				Bots:    3,
+			},
+			want: ServerProperties{
+				"Map":  "snooker",
+				"Ping": 73,
+				"Bots": 3,
+			},
+		},
+		{
+			name: "no equal ServerPayload (players)",
+			first: ServerPayload{
+				Address: ServerAddr(goqstat_server1.Address),
+				Name:    goqstat_server1.Name,
+				Players: Players{player1, player2, player3},
+			},
+			second: ServerPayload{
+				Address: ServerAddr(goqstat_server1.Address),
+				Name:    goqstat_server1.Name,
+				Players: Players{player4, player2},
+			},
+			want: ServerProperties{
+				"Players": PlayersChanges{
+					Added:   Players{player4},
+					Removed: Players{player1, player3},
+				},
+			},
+		},
+		{
+			name: "no equal ServerPayload (server address)",
+			first: ServerPayload{
+				Address: "",
+			},
+			second: ServerPayload{
+				Address: ServerAddr(goqstat_server2.Address),
+			},
+			want: ServerProperties{
+				"Address": ServerAddr(goqstat_server2.Address),
+			},
+		},
+	}
 
-		changesMap, found := got["Map"]
-		assertData(t, found, changesMap, secondData.Map)
-
-		changesPing, found := got["Ping"]
-		assertData(t, found, changesPing, secondData.Ping)
-
-		changesBots, found := got["Bots"]
-		assertData(t, found, changesBots, secondData.Bots)
-	})
-
-	t.Run("no equal Data (players)", func(t *testing.T) {
-		firstData.Players = Players{player1, player2, player3}
-		secondData.Players = Players{player4, player2}
-		want := PlayersChanges{
-			Added:   Players{player4},
-			Removed: Players{player1, player3},
-		}
-		got := getChangesData(firstData, secondData)
-
-		assertLen(t, len(got), 1)
-
-		changesPlayers, found := got["Players"]
-		assertPlayers(t, found, changesPlayers.(PlayersChanges), want)
-	})
-
-	t.Run("no equal Data (server)", func(t *testing.T) {
-		firstData.Address = ""
-		secondData.Address = ServerAddr(goqstat_server2.Address)
-		got := getChangesData(firstData, secondData)
-
-		changesAddress, found := got["Address"]
-
-		assertData(t, found, changesAddress, secondData.Address)
-	})
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			got := getServerPropertiesChanges(test.first, test.second)
+			assertDeepEqual(t, got, test.want)
+		})
+	}
 }
 
 func TestGetChangesPlayers(t *testing.T) {
-	t.Run("empty players", func(t *testing.T) {
-		firstPlayers := Players{}
-		secondPlayers := Players{}
-		want := PlayersChanges{Players{}, Players{}}
-		got := getChangesPlayers(firstPlayers, secondPlayers)
-		assertPlayers(t, true, got, want)
-	})
-	t.Run("equal players", func(t *testing.T) {
-		firstPlayers := Players{player1, player2}
-		secondPlayers := firstPlayers
-		want := PlayersChanges{Players{}, Players{}}
-		got := getChangesPlayers(firstPlayers, secondPlayers)
-		assertPlayers(t, true, got, want)
-	})
-	t.Run("changed players", func(t *testing.T) {
-		firstPlayers := Players{player1, player2}
-		secondPlayers := Players{player2, player3, player4}
-		want := PlayersChanges{
-			Added:   Players{player3, player4},
-			Removed: Players{player1},
-		}
-		got := getChangesPlayers(firstPlayers, secondPlayers)
-		assertPlayers(t, true, got, want)
-	})
-}
+	cases := []struct {
+		name   string
+		first  Players
+		second Players
+		want   PlayersChanges
+	}{
+		{
+			name:   "empty Players",
+			first:  Players{},
+			second: Players{},
+			want:   PlayersChanges{Players{}, Players{}},
+		},
+		{
+			name:   "equal Players",
+			first:  Players{player1, player2},
+			second: Players{player1, player2},
+			want:   PlayersChanges{Players{}, Players{}},
+		},
+		{
+			name:   "changed Players",
+			first:  Players{player1, player2},
+			second: Players{player2, player3, player4},
+			want: PlayersChanges{
+				Added:   Players{player3, player4},
+				Removed: Players{player1},
+			},
+		},
+	}
 
-func assertBool(t testing.TB, got, want bool) {
-	t.Helper()
-
-	if got != want {
-		t.Errorf("got %v want %v", got, want)
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			got := getPlayersChanges(test.first, test.second)
+			assertDeepEqual(t, got, test.want)
+		})
 	}
 }
 
-func assertStrings(t testing.TB, got, want string) {
+func assertDeepEqual(t testing.TB, got, want any) {
 	t.Helper()
 
-	if got != want {
-		t.Errorf("got %v want %v", got, want)
-	}
-}
-
-func assertLen(t testing.TB, got, want int) {
-	t.Helper()
-
-	if got != want {
-		t.Errorf("got %v len, want %v", got, want)
-	}
-}
-
-func assertData(t testing.TB, found bool, got, want any) {
-	t.Helper()
-	if !found || got != want {
-		t.Errorf("got %v want %v", got, want)
-	}
-}
-
-func assertPlayers(t testing.TB, found bool, got, want PlayersChanges) {
-	t.Helper()
-	if !found || !want.Equal(got) {
+	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %#v\nwant %#v", got, want)
 	}
 }
