@@ -19,7 +19,7 @@ func GoqstatToDataServers(new *[]goqstat.Server) ServerStore {
 }
 
 func serverToData(server goqstat.Server) ServerPayload {
-	numBots, err := getBotsFromRules(server.Rules)
+	numBots, err := getBotsFromString(server.Rules.Bots)
 	if err != nil {
 		numBots = 0
 	}
@@ -38,6 +38,6 @@ func checkServerPlayersValid(server goqstat.Server) bool {
 	return server.Numplayers == len(server.Players)
 }
 
-func getBotsFromRules(rules goqstat.Rules) (int, error) {
-	return strconv.Atoi(rules.Bots)
+func getBotsFromString(rules string) (int, error) {
+	return strconv.Atoi(rules)
 }

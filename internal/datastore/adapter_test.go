@@ -1,6 +1,7 @@
 package datastore
 
 import (
+	"fmt"
 	"strconv"
 	"testing"
 
@@ -78,49 +79,90 @@ func TestServerToData(t *testing.T) {
 }
 
 func TestCheckServerPlayersValid(t *testing.T) {
-	t.Run("empty server", func(t *testing.T) {
-		got := checkServerPlayersValid(goqstat_server1)
-		assertBool(t, got, true)
-	})
-	t.Run("invalid server players", func(t *testing.T) {
-		server := goqstat_server1
-		server.Numplayers = 2
-		got := checkServerPlayersValid(server)
-		assertBool(t, got, false)
-	})
-	t.Run("valid server players", func(t *testing.T) {
-		server := goqstat_server1
-		server.Numplayers = 2
-		server.Players = []goqstat.Player{player1, player2}
-		got := checkServerPlayersValid(server)
-		assertBool(t, got, true)
-	})
+	invalidServer := goqstat_server1
+	invalidServer.Numplayers = 2
+
+	validServer := goqstat_server1
+	validServer.Numplayers = 2
+	validServer.Players = []goqstat.Player{player1, player2}
+
+	cases := []struct {
+		name   string
+		server goqstat.Server
+		want   bool
+	}{
+		{
+			name:   "empty server",
+			server: goqstat_server1,
+			want:   true,
+		},
+		{
+			name:   "invalid server players",
+			server: invalidServer,
+			want:   false,
+		},
+		{
+			name:   "valid server players",
+			server: validServer,
+			want:   true,
+		},
+	}
+
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			got := checkServerPlayersValid(test.server)
+			assertBool(t, got, test.want)
+		})
+	}
 }
 
-func TestGetBotsFromRules(t *testing.T) {
+func TestGetBotsFromString(t *testing.T) {
 	assertEmptyError := func(t testing.TB, got error) {
 		t.Helper()
 		if got == nil {
 			t.Errorf("expected error, but got no one")
 		}
 	}
-	rules := goqstat.Rules{}
-	t.Run("empty Rules", func(t *testing.T) {
-		_, err := getBotsFromRules(rules)
-		assertEmptyError(t, err)
-	})
-	t.Run("invalid Rules", func(t *testing.T) {
-		rules.Bots = "1s"
-		_, err := getBotsFromRules(rules)
-		assertEmptyError(t, err)
-		rules.Bots = "1.0"
-		_, err = getBotsFromRules(rules)
-		assertEmptyError(t, err)
-	})
-	t.Run("valid Rules", func(t *testing.T) {
-		rules.Bots = "1"
-		want := 1
-		got, _ := getBotsFromRules(rules)
-		assertStrings(t, strconv.Itoa(got), strconv.Itoa(want))
-	})
+
+	cases := []struct {
+		name     string
+		bots     string
+		wantErr  error
+		wantBots int
+	}{
+		{
+			name:     "empty string",
+			bots:     "",
+			wantErr:  fmt.Errorf("error"),
+			wantBots: 0,
+		},
+		{
+			name:     "invalid bots string 1",
+			bots:     "1s",
+			wantErr:  fmt.Errorf("error"),
+			wantBots: 0,
+		},
+		{
+			name:     "invalid bots string 2",
+			bots:     "1.0",
+			wantErr:  fmt.Errorf("error"),
+			wantBots: 0,
+		},
+		{
+			name:     "valid string",
+			bots:     "1",
+			wantErr:  nil,
+			wantBots: 1,
+		},
+	}
+
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := getBotsFromString(test.bots)
+			if test.wantErr != nil {
+				assertEmptyError(t, err)
+			}
+			assertStrings(t, strconv.Itoa(got), strconv.Itoa(test.wantBots))
+		})
+	}
 }
