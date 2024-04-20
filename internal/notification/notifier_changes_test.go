@@ -13,6 +13,8 @@ var (
 	userAppear2    = goqstat.Player{Name: "user_appear2", Ping: 20}
 	userDisappear1 = goqstat.Player{Name: "user_disappear1", Ping: 30}
 	userDisappear2 = goqstat.Player{Name: "user_disappear2", Ping: 40}
+	userMismatch1  = goqstat.Player{Name: "user_mismatch1", Ping: 40}
+	userMismatch2  = goqstat.Player{Name: "user_mismatch2", Ping: 40}
 )
 
 func TestNewNotifyChanges(t *testing.T) {
@@ -28,60 +30,97 @@ func TestNewNotifyChanges(t *testing.T) {
 }
 
 func TestNewNotifyServerChanges(t *testing.T) {
-	changesProperties := data.ServerProperties{
-		"Map":  "test",
-		"Ping": 51,
-	}
-	playersChanges := data.PlayersChanges{
-		Added:   []goqstat.Player{userAppear1, userAppear2},
-		Removed: []goqstat.Player{userDisappear1, userDisappear2},
-	}
-	t.Run("empty notify value expected", func(t *testing.T) {
-		want := NotifyServerChanges{}
-		got := newNotifyServerChanges(data.ServerProperties{}, notifConfig1)
-		assertStruct(t, got, want)
-
-		got = newNotifyServerChanges(changesProperties, notifConfig1)
-		assertStruct(t, got, want)
-	})
-	t.Run("maps appear", func(t *testing.T) {
-		changes := data.ServerProperties{
+	var (
+		playersChanges = data.PlayersChanges{
+			Added:   []goqstat.Player{userAppear1, userAppear2},
+			Removed: []goqstat.Player{userDisappear1, userDisappear2},
+		}
+		playersChangesMismatch = data.PlayersChanges{
+			Added:   []goqstat.Player{userMismatch1},
+			Removed: []goqstat.Player{userMismatch2},
+		}
+	)
+	var (
+		propertiesMismatch = data.ServerProperties{
+			"Map":     "test_map",
+			"Players": playersChangesMismatch,
+			"Ping":    50,
+			"Bots":    3,
+			"Name":    "test_name",
+		}
+		propertiesMapAndPing = data.ServerProperties{
 			"Map":  "mars",
-			"Ping": 51,
+			"Ping": 50,
 		}
-		want := NotifyServerChanges{
-			"maps_appear": []string{"mars"},
+		propertiesPlayers = data.ServerProperties{
+			"Players": playersChanges,
+			"Ping":    50,
 		}
-		got := newNotifyServerChanges(changes, notifConfig1)
-		assertStruct(t, got, want)
-	})
-	t.Run("players appear and disappear", func(t *testing.T) {
-		changes := changesProperties
-		changes["Players"] = playersChanges
-		want := NotifyServerChanges{
-			"players_appear":    []string{"user_appear1", "user_appear2"},
-			"players_disappear": []string{"user_disappear1", "user_disappear2"},
+		propertiesPlayersAndMap = data.ServerProperties{
+			"Map":     "mars",
+			"Players": playersChanges,
+			"Ping":    50,
 		}
-		got := newNotifyServerChanges(changes, notifConfig1)
-		assertStruct(t, got, want)
-	})
-	t.Run("maps and players changed", func(t *testing.T) {
-		changes := changesProperties
-		changes["Map"] = "mars"
-		changes["Players"] = playersChanges
-		want := NotifyServerChanges{
-			"maps_appear":       []string{"mars"},
-			"players_appear":    []string{"user_appear1", "user_appear2"},
-			"players_disappear": []string{"user_disappear1", "user_disappear2"},
-		}
-		got := newNotifyServerChanges(changes, notifConfig1)
-		assertStruct(t, got, want)
-	})
+	)
+	cases := []struct {
+		name       string
+		properties data.ServerProperties
+		config     config.Notifications
+		want       NotifyServerChanges
+	}{
+		{
+			name:       "empty ServerProperties and Notify config",
+			properties: data.ServerProperties{},
+			config:     config.Notifications{},
+			want:       NotifyServerChanges{},
+		},
+		{
+			name:       "empty Notify config",
+			properties: propertiesMapAndPing,
+			config:     config.Notifications{},
+			want:       NotifyServerChanges{},
+		},
+		{
+			name:       "mismatch map",
+			properties: propertiesMismatch,
+			config:     config.Notifications{},
+			want:       NotifyServerChanges{},
+		},
+		{
+			name:       "maps appear",
+			properties: propertiesMapAndPing,
+			config:     notifConfig,
+			want: NotifyServerChanges{
+				"maps_appear": []string{"mars"},
+			},
+		},
+		{
+			name:       "players appear and disappear",
+			properties: propertiesPlayers,
+			config:     notifConfig,
+			want: NotifyServerChanges{
+				"players_appear":    []string{"user_appear1", "user_appear2"},
+				"players_disappear": []string{"user_disappear1", "user_disappear2"},
+			},
+		},
+		{
+			name:       "maps and players changed",
+			properties: propertiesPlayersAndMap,
+			config:     notifConfig,
+			want: NotifyServerChanges{
+				"maps_appear":       []string{"mars"},
+				"players_appear":    []string{"user_appear1", "user_appear2"},
+				"players_disappear": []string{"user_disappear1", "user_disappear2"},
+			},
+		},
+	}
 
-	// t.Run("any player appear in empty server", func(t *testing.T) {
-	// 	got := newNotifyServerChanges(data.DataProperties{})
-	// 	assertLen(t, len(got), 0)
-	// })
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			got := newNotifyServerChanges(test.properties, test.config)
+			assertStruct(t, got, test.want)
+		})
+	}
 }
 
 func assertLen(t testing.TB, got, want int) {

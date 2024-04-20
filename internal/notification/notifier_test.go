@@ -6,11 +6,11 @@ import (
 )
 
 var conf = config.Store{
-	Global:  config.Global{Notifications: notifConfig1},
+	Global:  config.Global{Notifications: notifConfig},
 	Servers: nil,
 }
 
-var notifConfig1 = config.Notifications{
+var notifConfig = config.Notifications{
 	MapsAppear:                   []string{"mars", "snooker", "cofrag"},
 	PlayersAppear:                []string{"user_appear1", "user_appear2"},
 	PlayersDisappear:             []string{"user_disappear1", "user_disappear2"},
@@ -26,7 +26,7 @@ func TestNewNotifierSettings(t *testing.T) {
 	})
 	t.Run("conf with values", func(t *testing.T) {
 		want := NotifierSettings{
-			Global:  notifConfig1,
+			Global:  notifConfig,
 			Servers: nil,
 		}
 		got := NewNotifierSettings(&conf)
