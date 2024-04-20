@@ -12,16 +12,19 @@ type PlayersChanges struct {
 }
 
 func getServerChanges(first, second ServerStore) ServerChanges {
-	dataChanges := ServerChanges{}
-	for serverAddr, firstData := range first {
-		secondData := second[serverAddr]
-		changes := getServerPropertiesChanges(firstData, secondData)
+	serverChanges := ServerChanges{}
+	for serverAddr, firstPayload := range first {
+		secondPayload := second[serverAddr]
+		if serverAddr != secondPayload.Address {
+			continue
+		}
+		properties := getServerPropertiesChanges(firstPayload, secondPayload)
 
-		if len(changes) != 0 {
-			dataChanges[serverAddr] = changes
+		if len(properties) != 0 {
+			serverChanges[serverAddr] = properties
 		}
 	}
-	return dataChanges
+	return serverChanges
 }
 
 func getServerPropertiesChanges(first, second ServerPayload) ServerProperties {
