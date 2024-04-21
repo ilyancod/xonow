@@ -32,23 +32,32 @@ func main() {
 	}
 	notificationSettings := notification.NewNotifierSettings(conf)
 	for {
-		var servers []string
-		for server := range conf.Servers {
-			servers = append(servers, server)
-		}
-		result, err := goqstat.GetXonotics(servers...)
+
+		goqstatData, err := GetGoqstatData(conf)
 		if err != nil {
 			fmt.Println(err)
+			continue
 		}
 
-		serverData := datastore.GoqstatToDataServers(&result)
+		serverData := datastore.GoqstatToDataServers(&goqstatData)
 		dataChanges := store.UpdateServerData(serverData)
 
 		notifyChanges := notification.NewNotifyChanges(dataChanges, notificationSettings)
 
-		notification.RunNotifier(notifyChanges)
+		notifyDesktop := &notification.NotifyDesktop{
+			IconPath: "assets/xonotic.png",
+		}
+		notifyChanges.Notify(notifyDesktop)
 		time.Sleep(time.Second * 5)
 	}
+}
+
+func GetGoqstatData(conf *config.Store) ([]goqstat.Server, error) {
+	servers := make([]string, 0, len(conf.Servers))
+	for server := range conf.Servers {
+		servers = append(servers, server)
+	}
+	return goqstat.GetXonotics(servers...)
 }
 
 func PrintCurrentData(data []goqstat.Server) {
