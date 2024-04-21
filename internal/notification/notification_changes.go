@@ -3,6 +3,7 @@ package notification
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"xonow/internal/config"
 	data "xonow/internal/datastore"
 )
@@ -90,6 +91,35 @@ func getPlayersByNames(players data.Players, playerNames []string) (result []str
 		found = true
 	}
 	return
+}
+
+func (nc NotifyChanges) Notify(notifier Notifier) {
+	for serverAddr, notifyServerChanges := range nc {
+		for configName, configValue := range notifyServerChanges {
+			title := "Xonow: notifyChanges on the server " + string(serverAddr)
+			var notifyText string
+			switch configName {
+			case "maps_appear":
+				{
+					notifyText = "Map appeared: "
+				}
+			case "players_appear":
+				{
+					notifyText = "Players appeared: "
+				}
+			case "players_disappear":
+				{
+					notifyText = "Players disappeared: "
+				}
+			}
+			notifyText += strings.Join(configValue, " ")
+
+			err := notifier.notify(title, notifyText)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}
 }
 
 func interfaceToString(value any) (string, error) {
