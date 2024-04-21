@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"io/fs"
+	"os"
 	"sync"
 )
 
@@ -44,15 +45,29 @@ func GetConfig() *Store {
 
 func (s *Store) ReadFromFile(fileSystem fs.FS, fileName string) error {
 	file, err := fileSystem.Open(fileName)
-	defer file.Close()
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 
 	dec := json.NewDecoder(file)
 	dec.DisallowUnknownFields()
 
 	if err = dec.Decode(&singleConfig); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Store) SaveToFile(fileName string) error {
+	file, err := os.Create(fileName)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	encoder := json.NewEncoder(file)
+	err = encoder.Encode(s)
+	if err != nil {
 		return err
 	}
 	return nil

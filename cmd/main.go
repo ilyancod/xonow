@@ -14,11 +14,15 @@ import (
 
 func main() {
 	conf := config.GetConfig()
-	fileSystem := os.DirFS("./config/")
+	fileSystem := os.DirFS("../config/")
 
 	err := conf.ReadFromFile(fileSystem, "config.json")
 	if err != nil {
 		fmt.Println("error opening the config: ", err)
+		err = conf.SaveToFile("../config/config.json")
+		if err != nil {
+			fmt.Println("error creating the config: ", err)
+		}
 		return
 	}
 
