@@ -2,13 +2,13 @@ package config
 
 import (
 	"encoding/json"
-	"os"
+	"io/fs"
 	"sync"
 )
 
 type Store struct {
-	Global  Global                 `json:"global,omitempty"`
-	Servers map[string]interface{} `json:"servers,omitempty"`
+	Global  Global         `json:"global,omitempty"`
+	Servers map[string]any `json:"servers,omitempty"`
 }
 
 type Global struct {
@@ -26,22 +26,24 @@ type Notifications struct {
 	AnyPlayerAppearInEmptyServer bool     `json:"any_player_appear_in_empty_server,omitempty"`
 }
 
-var singleConfig *Store
-var lock = &sync.Mutex{}
+var (
+	singleConfig *Store
+	lock         = &sync.Mutex{}
+)
 
 func GetConfig() *Store {
 	if singleConfig == nil {
 		lock.Lock()
 		defer lock.Unlock()
 		singleConfig = &Store{
-			Servers: make(map[string]interface{}),
+			Servers: make(map[string]any),
 		}
 	}
 	return singleConfig
 }
 
-func (cs *Store) ReadFromFile(filePath string) error {
-	file, err := os.Open(filePath)
+func (s *Store) ReadFromFile(fileSystem fs.FS, fileName string) error {
+	file, err := fileSystem.Open(fileName)
 	defer file.Close()
 	if err != nil {
 		return err
@@ -54,6 +56,11 @@ func (cs *Store) ReadFromFile(filePath string) error {
 		return err
 	}
 	return nil
+}
+
+func (s *Store) Clear() {
+	s.Global = Global{}
+	s.Servers = map[string]any{}
 }
 
 func (n Notifications) Empty() bool {

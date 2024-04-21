@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"time"
 	"xonow/internal/config"
@@ -13,7 +14,9 @@ import (
 
 func main() {
 	conf := config.GetConfig()
-	err := conf.ReadFromFile("./config/config.json")
+	fileSystem := os.DirFS("./config/")
+
+	err := conf.ReadFromFile(fileSystem, "config.json")
 	if err != nil {
 		fmt.Println("error opening the config: ", err)
 		return
