@@ -93,28 +93,28 @@ func getPlayersByNames(players data.Players, playerNames []string) (result []str
 	return
 }
 
-func (nc NotifyChanges) Notify(notifier Notifier) {
+func (nc NotifyChanges) Emit(notifier Notifier) {
 	for serverAddr, notifyServerChanges := range nc {
 		for configName, configValue := range notifyServerChanges {
 			title := "Xonow: notifyChanges on the server " + string(serverAddr)
-			var notifyText string
+			var message string
 			switch configName {
 			case "maps_appear":
 				{
-					notifyText = "Map appeared: "
+					message = "Map appeared: "
 				}
 			case "players_appear":
 				{
-					notifyText = "Players appeared: "
+					message = "Players appeared: "
 				}
 			case "players_disappear":
 				{
-					notifyText = "Players disappeared: "
+					message = "Players disappeared: "
 				}
 			}
-			notifyText += strings.Join(configValue, " ")
+			message += strings.Join(configValue, ", ")
 
-			err := notifier.notify(title, notifyText)
+			err := notifier.Notify(title, message)
 			if err != nil {
 				fmt.Println(err)
 			}

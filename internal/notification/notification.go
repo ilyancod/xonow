@@ -6,7 +6,7 @@ import (
 )
 
 type Notifier interface {
-	notify(title, text string) error
+	Notify(title, message string) error
 }
 
 type NotifierSettings struct {

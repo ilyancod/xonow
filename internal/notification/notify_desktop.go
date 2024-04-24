@@ -8,6 +8,6 @@ type NotifyDesktop struct {
 	IconPath string
 }
 
-func (nd *NotifyDesktop) notify(title, text string) error {
+func (nd *NotifyDesktop) Notify(title, text string) error {
 	return beeep.Notify(title, text, nd.IconPath)
 }

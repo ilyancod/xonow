@@ -40,14 +40,14 @@ func main() {
 		}
 
 		serverData := datastore.GoqstatToDataServers(&goqstatData)
-		dataChanges := store.UpdateServerData(serverData)
+		serverChanges := store.UpdateServerData(serverData)
 
-		notifyChanges := notification.NewNotifyChanges(dataChanges, notificationSettings)
+		notifyChanges := notification.NewNotifyChanges(serverChanges, notificationSettings)
 
 		notifyDesktop := &notification.NotifyDesktop{
 			IconPath: "assets/xonotic.png",
 		}
-		notifyChanges.Notify(notifyDesktop)
+		notifyChanges.Emit(notifyDesktop)
 		time.Sleep(time.Second * 5)
 	}
 }
