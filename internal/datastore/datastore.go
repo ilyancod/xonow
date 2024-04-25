@@ -7,7 +7,6 @@ import (
 )
 
 type ServerAddr string
-type PropertyName string
 
 type dataStore struct {
 	serverData ServerStore

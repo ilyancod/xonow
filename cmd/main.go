@@ -33,13 +33,13 @@ func main() {
 	notificationSettings := notification.NewNotifierSettings(conf)
 	for {
 
-		goqstatData, err := GetGoqstatData(conf)
+		goqstatServers, err := GetGoqstatData(conf)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 
-		serverData := datastore.GoqstatToDataServers(&goqstatData)
+		serverData := datastore.GoqstatToDataServers(&goqstatServers)
 		serverChanges := store.UpdateServerData(serverData)
 
 		notifyChanges := notification.NewNotifyChanges(serverChanges, notificationSettings)

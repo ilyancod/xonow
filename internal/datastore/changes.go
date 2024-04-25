@@ -5,6 +5,7 @@ import (
 )
 
 type ServerChanges map[ServerAddr]ServerProperties
+type PropertyName string
 type ServerProperties map[PropertyName]interface{}
 type PlayersChanges struct {
 	Added   Players
