@@ -2,6 +2,7 @@ package main_test
 
 import (
 	"github.com/ilyancod/goqstat"
+	"sort"
 	"strings"
 	"testing"
 	"testing/fstest"
@@ -82,9 +83,17 @@ type StubFormatter struct{}
 
 func (sf StubFormatter) Format(changes notification.NotifyServerChanges) string {
 	result := ""
-	for configName, configValue := range changes {
+	keys := make([]string, 0, len(changes))
+	for key := range changes {
+		keys = append(keys, string(key))
+	}
+	// map keys has a random order
+	sort.Strings(keys)
+	for _, configName := range keys {
+		configValue := changes[notification.ConfigName(configName)]
 		result += string(configName) + " " + strings.Join(configValue, " ") + "\n"
 	}
+
 	return result
 }
 
