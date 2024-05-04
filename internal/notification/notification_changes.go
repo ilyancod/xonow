@@ -13,6 +13,38 @@ const (
 	ErrInterfaceNoPlayersChanges = NotifierErr("expected PlayersChanges value type")
 )
 
+type Notifier interface {
+	Notify(title, message string) error
+}
+
+type Formatter interface {
+	Format(changes NotifyServerChanges) string
+}
+
+type HTMLFormater struct{}
+
+func (hm HTMLFormater) Format(changes NotifyServerChanges) string {
+	result := ""
+	for configName, configValue := range changes {
+		switch configName {
+		case "maps_appear":
+			{
+				result += "Map appeared: "
+			}
+		case "players_appear":
+			{
+				result += "Players appeared: "
+			}
+		case "players_disappear":
+			{
+				result += "Players disappeared: "
+			}
+		}
+		result += strings.Join(configValue, ", ") + "\n"
+	}
+	return result
+}
+
 type NotifierErr string
 
 func (e NotifierErr) Error() string {
@@ -93,31 +125,16 @@ func getPlayersByNames(players data.Players, playerNames []string) (result []str
 	return
 }
 
-func (nc NotifyChanges) Emit(notifier Notifier) {
+func (nc NotifyChanges) Emit(notifier Notifier, formatter Formatter) {
 	for serverAddr, notifyServerChanges := range nc {
-		for configName, configValue := range notifyServerChanges {
-			title := "Xonow: notifyChanges on the server " + string(serverAddr)
-			var message string
-			switch configName {
-			case "maps_appear":
-				{
-					message = "Map appeared: "
-				}
-			case "players_appear":
-				{
-					message = "Players appeared: "
-				}
-			case "players_disappear":
-				{
-					message = "Players disappeared: "
-				}
-			}
-			message += strings.Join(configValue, ", ")
-
-			err := notifier.Notify(title, message)
-			if err != nil {
-				fmt.Println(err)
-			}
+		message := formatter.Format(notifyServerChanges)
+		if message == "" {
+			continue
+		}
+		title := "Changes on the server " + string(serverAddr)
+		err := notifier.Notify(title, message)
+		if err != nil {
+			fmt.Println(err)
 		}
 	}
 }

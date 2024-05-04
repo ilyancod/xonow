@@ -2,6 +2,7 @@ package main_test
 
 import (
 	"github.com/ilyancod/goqstat"
+	"strings"
 	"testing"
 	"testing/fstest"
 	"xonow/internal/config"
@@ -63,6 +64,7 @@ var (
 )
 
 type StubNotifier struct {
+	Result    string
 	Notifiers []NotifyMessageResult
 }
 
@@ -74,6 +76,16 @@ type NotifyMessageResult struct {
 func (sn *StubNotifier) Notify(title, message string) error {
 	sn.Notifiers = append(sn.Notifiers, NotifyMessageResult{title, message})
 	return nil
+}
+
+type StubFormatter struct{}
+
+func (sf StubFormatter) Format(changes notification.NotifyServerChanges) string {
+	result := ""
+	for configName, configValue := range changes {
+		result += string(configName) + " " + strings.Join(configValue, " ") + "\n"
+	}
+	return result
 }
 
 func TestNotification(t *testing.T) {
@@ -94,23 +106,29 @@ func TestNotification(t *testing.T) {
 	serverChanges := store.UpdateServerData(serverData)
 	notifyChanges := notification.NewNotifyChanges(serverChanges, notificationSettings)
 	stubNotifier := StubNotifier{}
-	notifyChanges.Emit(&stubNotifier)
+	formatter := notification.HTMLFormater{}
+	stubFormatter := StubFormatter{}
+	notifyChanges.Emit(&stubNotifier, stubFormatter)
 
 	want := []NotifyMessageResult{
 		{
-			Title:   "Xonow: notifyChanges on the server 149.202.87.185:26010",
-			Message: "Map appeared: snooker",
-		},
-		{
-			Title:   "Xonow: notifyChanges on the server 149.202.87.185:26010",
-			Message: "Players appeared: test_user1, test_user2",
+			Title: "Changes on the server 149.202.87.185:26010",
+			Message: `maps_appear snooker
+players_appear test_user1 test_user2
+`,
 		},
 	}
+
+	notifyDesktop := &notification.NotifyDesktop{
+		IconPath: "assets/xonotic.png",
+	}
+	notifyChanges.Emit(notifyDesktop, formatter)
 
 	assertNotifyMessageResult(t, stubNotifier.Notifiers, want)
 }
 
 func assertNotifyMessageResult(t testing.TB, got, want []NotifyMessageResult) {
+	t.Helper()
 	for _, messageWant := range want {
 		found := false
 		for _, messageGot := range got {
@@ -120,7 +138,7 @@ func assertNotifyMessageResult(t testing.TB, got, want []NotifyMessageResult) {
 			}
 		}
 		if !found {
-			t.Errorf("not found %#v in %#v", messageWant, got)
+			t.Errorf("not found %#v\nin %#v", messageWant, got)
 		}
 	}
 }

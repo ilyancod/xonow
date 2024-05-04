@@ -47,7 +47,8 @@ func main() {
 		notifyDesktop := &notification.NotifyDesktop{
 			IconPath: "assets/xonotic.png",
 		}
-		notifyChanges.Emit(notifyDesktop)
+		formatter := notification.HTMLFormater{}
+		notifyChanges.Emit(notifyDesktop, formatter)
 		time.Sleep(time.Second * 5)
 	}
 }

@@ -5,10 +5,6 @@ import (
 	data "xonow/internal/datastore"
 )
 
-type Notifier interface {
-	Notify(title, message string) error
-}
-
 type NotifierSettings struct {
 	Global  config.Notifications
 	Servers map[data.ServerAddr]config.Notifications
