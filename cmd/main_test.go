@@ -81,7 +81,11 @@ func (sn *StubNotifier) Notify(title, message string) error {
 
 type StubFormatter struct{}
 
-func (sf StubFormatter) Format(changes notification.NotifyServerChanges) string {
+func (sf StubFormatter) FormatTitle(serverAddress datastore.ServerAddr) string {
+	return string(serverAddress)
+}
+
+func (sf StubFormatter) FormatMessage(changes notification.NotifyServerChanges) string {
 	result := ""
 	keys := make([]string, 0, len(changes))
 	for key := range changes {
@@ -114,7 +118,7 @@ func TestNotification(t *testing.T) {
 			newData:    []goqstat.Server{goqstat_server1},
 			want: []NotifyMessageResult{
 				{
-					Title: "Changes on the server 149.202.87.185:26010",
+					Title: "149.202.87.185:26010",
 					Message: `maps_appear snooker
 players_appear test_user1 test_user2
 `,

@@ -18,12 +18,17 @@ type Notifier interface {
 }
 
 type Formatter interface {
-	Format(changes NotifyServerChanges) string
+	FormatTitle(serverAddress data.ServerAddr) string
+	FormatMessage(changes NotifyServerChanges) string
 }
 
 type HTMLFormater struct{}
 
-func (hm HTMLFormater) Format(changes NotifyServerChanges) string {
+func (hm HTMLFormater) FormatTitle(serverAddress data.ServerAddr) string {
+	return "Changes on the server " + string(serverAddress)
+}
+
+func (hm HTMLFormater) FormatMessage(changes NotifyServerChanges) string {
 	result := ""
 	for configName, configValue := range changes {
 		switch configName {
@@ -127,11 +132,11 @@ func getPlayersByNames(players data.Players, playerNames []string) (result []str
 
 func (nc NotifyChanges) Emit(notifier Notifier, formatter Formatter) {
 	for serverAddr, notifyServerChanges := range nc {
-		message := formatter.Format(notifyServerChanges)
+		title := formatter.FormatTitle(serverAddr)
+		message := formatter.FormatMessage(notifyServerChanges)
 		if message == "" {
 			continue
 		}
-		title := "Changes on the server " + string(serverAddr)
 		err := notifier.Notify(title, message)
 		if err != nil {
 			fmt.Println(err)
