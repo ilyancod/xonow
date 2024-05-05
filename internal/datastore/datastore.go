@@ -8,27 +8,27 @@ import (
 
 type ServerAddr string
 
-type dataStore struct {
+type DataStore struct {
 	serverData ServerStore
 }
 
 type Players []goqstat.Player
 
-var singleDataStore *dataStore
+var singleDataStore *DataStore
 var lock = &sync.Mutex{}
 
-func GetDataStore() *dataStore {
+func GetDataStore() *DataStore {
 	if singleDataStore == nil {
 		lock.Lock()
 		defer lock.Unlock()
-		singleDataStore = &dataStore{
+		singleDataStore = &DataStore{
 			serverData: make(ServerStore),
 		}
 	}
 	return singleDataStore
 }
 
-func (ds *dataStore) UpdateServerData(serverData ServerStore) ServerChanges {
+func (ds *DataStore) UpdateServerData(serverData ServerStore) ServerChanges {
 	changes := getServerChanges(ds.serverData, serverData)
 
 	for _, data := range serverData {
@@ -38,12 +38,16 @@ func (ds *dataStore) UpdateServerData(serverData ServerStore) ServerChanges {
 	return changes
 }
 
-func (ds *dataStore) AddServer(address ServerAddr, payload ServerPayload) {
+func (ds *DataStore) AddServer(address ServerAddr, payload ServerPayload) {
 	ds.serverData.Add(address, payload)
 }
 
-func (ds *dataStore) RemoveServer(address ServerAddr) {
+func (ds *DataStore) RemoveServer(address ServerAddr) {
 	ds.serverData.Remove(address)
+}
+
+func (ds *DataStore) Clear() {
+	ds.serverData = make(ServerStore)
 }
 
 func (p Players) ContainsName(name string) bool {
