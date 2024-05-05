@@ -98,42 +98,64 @@ func (sf StubFormatter) Format(changes notification.NotifyServerChanges) string 
 }
 
 func TestNotification(t *testing.T) {
-	conf := config.GetConfig()
 	filesystem := fstest.MapFS{"config.json": {Data: []byte(validConfig)}}
-	err := conf.ReadFromFile(filesystem, "config.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-	store := datastore.GetDataStore()
-	for serverAddress := range conf.Servers {
-		store.AddServer(datastore.ServerAddr(serverAddress), datastore.ServerPayload{})
-	}
-	notificationSettings := notification.NewNotifierSettings(conf)
-	goqstatData := []goqstat.Server{goqstat_server1}
-
-	serverData := datastore.GoqstatToDataServers(&goqstatData)
-	serverChanges := store.UpdateServerData(serverData)
-	notifyChanges := notification.NewNotifyChanges(serverChanges, notificationSettings)
-	stubNotifier := StubNotifier{}
-	formatter := notification.HTMLFormater{}
-	stubFormatter := StubFormatter{}
-	notifyChanges.Emit(&stubNotifier, stubFormatter)
-
-	want := []NotifyMessageResult{
+	cases := []struct {
+		name          string
+		configName    string
+		dataStore     *datastore.DataStore
+		newData       []goqstat.Server
+		want          []NotifyMessageResult
+		notifyDesktop bool
+	}{
 		{
-			Title: "Changes on the server 149.202.87.185:26010",
-			Message: `maps_appear snooker
+			name:       "valid notification",
+			configName: "config.json",
+			dataStore:  datastore.GetDataStore(),
+			newData:    []goqstat.Server{goqstat_server1},
+			want: []NotifyMessageResult{
+				{
+					Title: "Changes on the server 149.202.87.185:26010",
+					Message: `maps_appear snooker
 players_appear test_user1 test_user2
 `,
+				},
+			},
+			notifyDesktop: true,
 		},
 	}
 
-	notifyDesktop := &notification.NotifyDesktop{
-		IconPath: "assets/xonotic.png",
-	}
-	notifyChanges.Emit(notifyDesktop, formatter)
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			conf := config.GetConfig()
+			conf.Clear()
+			err := conf.ReadFromFile(filesystem, test.configName)
+			if err != nil {
+				t.Fatal(err)
+			}
+			test.dataStore.Clear()
+			for serverAddress := range conf.Servers {
+				test.dataStore.AddServer(datastore.ServerAddr(serverAddress), datastore.ServerPayload{})
+			}
+			notificationSettings := notification.NewNotifierSettings(conf)
 
-	assertNotifyMessageResult(t, stubNotifier.Notifiers, want)
+			serverData := datastore.GoqstatToDataServers(&test.newData)
+			serverChanges := test.dataStore.UpdateServerData(serverData)
+			notifyChanges := notification.NewNotifyChanges(serverChanges, notificationSettings)
+			stubNotifier := StubNotifier{}
+			stubFormatter := StubFormatter{}
+			notifyChanges.Emit(&stubNotifier, stubFormatter)
+
+			assertNotifyMessageResult(t, stubNotifier.Notifiers, test.want)
+
+			if test.notifyDesktop {
+				notifyDesktop := &notification.NotifyDesktop{
+					IconPath: "assets/xonotic.png",
+				}
+				formatter := notification.HTMLFormater{}
+				notifyChanges.Emit(notifyDesktop, formatter)
+			}
+		})
+	}
 }
 
 func assertNotifyMessageResult(t testing.TB, got, want []NotifyMessageResult) {
