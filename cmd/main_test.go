@@ -2,6 +2,8 @@ package main_test
 
 import (
 	"github.com/ilyancod/goqstat"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"testing"
@@ -153,7 +155,7 @@ players_appear test_user1 test_user2
 
 			if test.notifyDesktop {
 				notifyDesktop := &notification.NotifyDesktop{
-					IconPath: "assets/xonotic.png",
+					IconPath: getIconPath(t),
 				}
 				formatter := notification.HTMLFormater{}
 				notifyChanges.Emit(notifyDesktop, formatter)
@@ -176,4 +178,14 @@ func assertNotifyMessageResult(t testing.TB, got, want []NotifyMessageResult) {
 			t.Errorf("not found %#v\nin %#v", messageWant, got)
 		}
 	}
+}
+
+func getIconPath(t testing.TB) string {
+	workDir, err := os.Getwd()
+	if err != nil {
+		t.Fatal("error getting icon path:", err)
+	}
+	iconDir := filepath.Join(workDir, "..")
+	iconDir = filepath.Join(iconDir, "assets")
+	return iconDir + "/xonotic.png"
 }
