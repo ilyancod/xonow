@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	conf := config.GetConfig()
+	conf := config.GetConfigSingleInstance()
 
 	configDir, err := utils.GetConfigDir()
 	if err != nil {
@@ -40,7 +40,7 @@ func main() {
 		return
 	}
 
-	store := datastore.GetDataStore()
+	store := datastore.GetDataStoreSingleInstance()
 	for serverAddress := range conf.Servers {
 		store.AddServer(datastore.IpAddr(serverAddress), datastore.ServerPayload{})
 	}

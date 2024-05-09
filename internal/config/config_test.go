@@ -42,11 +42,11 @@ const (
 )
 
 func TestGetConfig(t *testing.T) {
-	store1 := GetConfig()
+	store1 := GetConfigSingleInstance()
 	store1.Servers = map[string]any{
 		"149.202.87.185:26010": make(map[string]any),
 	}
-	store2 := GetConfig()
+	store2 := GetConfigSingleInstance()
 	assertDeepEqual(t, store1, store2)
 }
 
@@ -84,7 +84,7 @@ func TestReadFromFile(t *testing.T) {
 
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
-			config := GetConfig()
+			config := GetConfigSingleInstance()
 			config.Clear()
 			err := config.ReadFromFile(test.fs, test.fileName)
 			assertError(t, err, test.error)
@@ -94,7 +94,7 @@ func TestReadFromFile(t *testing.T) {
 }
 
 func BenchmarkStore_ReadFromFile(b *testing.B) {
-	config := GetConfig()
+	config := GetConfigSingleInstance()
 	config.Clear()
 	b.ResetTimer()
 

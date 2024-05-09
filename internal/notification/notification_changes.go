@@ -133,7 +133,7 @@ func getPlayersByNames(players data.Players, playerNames []string) (result []str
 }
 
 func (nc NotifyChanges) Emit(notifier Notifier, formatter Formatter) {
-	dataStore := data.GetDataStore()
+	dataStore := data.GetDataStoreSingleInstance()
 	for serverAddr, notifyServerChanges := range nc {
 		serverPayload, found := dataStore.GetServer(serverAddr)
 		if !found {

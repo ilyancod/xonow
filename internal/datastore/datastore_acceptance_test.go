@@ -79,7 +79,7 @@ func TestUpdateServerData(t *testing.T) {
 
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
-			dataStore := data.GetDataStore()
+			dataStore := data.GetDataStoreSingleInstance()
 			for _, server := range test.servers {
 				dataStore.AddServer(server.Address, server)
 			}

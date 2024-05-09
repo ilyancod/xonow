@@ -32,7 +32,7 @@ var (
 	lock         = &sync.Mutex{}
 )
 
-func GetConfig() *Store {
+func GetConfigSingleInstance() *Store {
 	if singleConfig == nil {
 		lock.Lock()
 		defer lock.Unlock()

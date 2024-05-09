@@ -18,7 +18,7 @@ var (
 )
 
 func TestNewNotifyChanges(t *testing.T) {
-	notifierSettings := NewNotifierSettings(config.GetConfig())
+	notifierSettings := NewNotifierSettings(config.GetConfigSingleInstance())
 	t.Run("empty changes", func(t *testing.T) {
 		got := NewNotifyChanges(data.ServerChanges{}, notifierSettings)
 		assertLen(t, len(got), 0)

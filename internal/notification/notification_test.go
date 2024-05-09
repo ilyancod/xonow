@@ -19,7 +19,7 @@ var notifConfig = config.Notifications{
 
 func TestNewNotifierSettings(t *testing.T) {
 	t.Run("empty conf", func(t *testing.T) {
-		got := NewNotifierSettings(config.GetConfig())
+		got := NewNotifierSettings(config.GetConfigSingleInstance())
 		if !got.Global.Empty() && len(got.Servers) != 0 {
 			t.Errorf("got no empty NotifierSettints, want empty")
 		}

@@ -116,7 +116,7 @@ func TestNotification(t *testing.T) {
 		{
 			name:       "valid notification",
 			configName: "config.json",
-			dataStore:  datastore.GetDataStore(),
+			dataStore:  datastore.GetDataStoreSingleInstance(),
 			newData:    []goqstat.Server{goqstat_server1},
 			want: []NotifyMessageResult{
 				{
@@ -132,7 +132,7 @@ players_appear test_user1 test_user2
 
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
-			conf := config.GetConfig()
+			conf := config.GetConfigSingleInstance()
 			conf.Clear()
 			err := conf.ReadFromFile(filesystem, test.configName)
 			if err != nil {

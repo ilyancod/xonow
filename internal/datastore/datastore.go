@@ -17,7 +17,7 @@ type Players []goqstat.Player
 var singleDataStore *DataStore
 var lock = &sync.Mutex{}
 
-func GetDataStore() *DataStore {
+func GetDataStoreSingleInstance() *DataStore {
 	if singleDataStore == nil {
 		lock.Lock()
 		defer lock.Unlock()
