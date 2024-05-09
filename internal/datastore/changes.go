@@ -4,7 +4,7 @@ import (
 	"reflect"
 )
 
-type ServerChanges map[ServerAddr]ServerProperties
+type ServerChanges map[IpAddr]ServerProperties
 type PropertyName string
 type ServerProperties map[PropertyName]interface{}
 type PlayersChanges struct {

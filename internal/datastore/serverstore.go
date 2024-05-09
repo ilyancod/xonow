@@ -4,18 +4,18 @@ import (
 	"encoding/json"
 )
 
-type ServerStore map[ServerAddr]ServerPayload
+type ServerStore map[IpAddr]ServerPayload
 
-func (ss *ServerStore) Add(address ServerAddr, payload ServerPayload) {
+func (ss *ServerStore) Add(address IpAddr, payload ServerPayload) {
 	(*ss)[address] = payload
 }
 
-func (ss *ServerStore) Remove(address ServerAddr) {
+func (ss *ServerStore) Remove(address IpAddr) {
 	delete(*ss, address)
 }
 
 type ServerPayload struct {
-	Address ServerAddr
+	Address IpAddr
 	Name    string
 	Map     string
 	Ping    int

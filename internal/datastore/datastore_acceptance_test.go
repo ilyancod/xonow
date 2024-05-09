@@ -18,7 +18,7 @@ func TestUpdateServerData(t *testing.T) {
 			servers: []data.ServerPayload{},
 			input: data.ServerStore{
 				"149.202.87.185:26010": data.ServerPayload{
-					Address: data.ServerAddr("149.202.87.185:26010"),
+					Address: data.IpAddr("149.202.87.185:26010"),
 					Name:    "test_name",
 					Map:     "test_map",
 					Ping:    50,
@@ -35,7 +35,7 @@ func TestUpdateServerData(t *testing.T) {
 			},
 			input: data.ServerStore{
 				"149.202.87.185:26010": data.ServerPayload{
-					Address: data.ServerAddr("149.202.87.185:26010"),
+					Address: data.IpAddr("149.202.87.185:26010"),
 					Name:    "test_name",
 					Map:     "test_map",
 					Ping:    50,
@@ -53,7 +53,7 @@ func TestUpdateServerData(t *testing.T) {
 			name: "empty DataStore",
 			servers: []data.ServerPayload{
 				{
-					Address: data.ServerAddr("149.202.87.185:26010"),
+					Address: data.IpAddr("149.202.87.185:26010"),
 					Name:    "test_name1",
 					Map:     "test_map1",
 					Ping:    45,
@@ -61,7 +61,7 @@ func TestUpdateServerData(t *testing.T) {
 			},
 			input: data.ServerStore{
 				"149.202.87.185:26010": data.ServerPayload{
-					Address: data.ServerAddr("149.202.87.185:26010"),
+					Address: data.IpAddr("149.202.87.185:26010"),
 					Name:    "test_name2",
 					Map:     "test_map2",
 					Ping:    50,

@@ -7,7 +7,7 @@ import (
 
 type NotifierSettings struct {
 	Global  config.Notifications
-	Servers map[data.ServerAddr]config.Notifications
+	Servers map[data.IpAddr]config.Notifications
 }
 
 func NewNotifierSettings(conf *config.Store) NotifierSettings {

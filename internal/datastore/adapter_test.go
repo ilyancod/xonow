@@ -47,7 +47,7 @@ func TestGoqstatToDataServers(t *testing.T) {
 	t.Run("valid Servers", func(t *testing.T) {
 		dataMap := GoqstatToDataServers(&servers)
 		for _, server := range servers {
-			data, found := dataMap[ServerAddr(server.Address)]
+			data, found := dataMap[IpAddr(server.Address)]
 			if !found {
 				t.Errorf("got nothing, but want %v", server.Address)
 			}

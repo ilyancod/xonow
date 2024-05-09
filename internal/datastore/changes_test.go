@@ -8,14 +8,14 @@ import (
 )
 
 var serverPayload1 = ServerPayload{
-	Address: ServerAddr(goqstat_server1.Address),
+	Address: IpAddr(goqstat_server1.Address),
 	Name:    goqstat_server1.Name,
 	Map:     goqstat_server1.Map,
 	Ping:    goqstat_server1.Ping,
 }
 
 var serverPayload2 = ServerPayload{
-	Address: ServerAddr(goqstat_server2.Address),
+	Address: IpAddr(goqstat_server2.Address),
 	Name:    goqstat_server2.Name,
 	Map:     goqstat_server2.Map,
 	Ping:    goqstat_server2.Ping,
@@ -86,7 +86,7 @@ func TestGetServerChanges(t *testing.T) {
 
 func TestGetServerPropertiesChanges(t *testing.T) {
 	firstData := ServerPayload{
-		Address: ServerAddr(goqstat_server1.Address),
+		Address: IpAddr(goqstat_server1.Address),
 		Name:    goqstat_server1.Name,
 		Map:     goqstat_server1.Map,
 		Ping:    goqstat_server1.Ping,
@@ -110,7 +110,7 @@ func TestGetServerPropertiesChanges(t *testing.T) {
 			name:  "no equal ServerPayload (map, ping, bots)",
 			first: firstData,
 			second: ServerPayload{
-				Address: ServerAddr(goqstat_server1.Address),
+				Address: IpAddr(goqstat_server1.Address),
 				Name:    goqstat_server1.Name,
 				Map:     "snooker",
 				Ping:    73,
@@ -125,12 +125,12 @@ func TestGetServerPropertiesChanges(t *testing.T) {
 		{
 			name: "no equal ServerPayload (players)",
 			first: ServerPayload{
-				Address: ServerAddr(goqstat_server1.Address),
+				Address: IpAddr(goqstat_server1.Address),
 				Name:    goqstat_server1.Name,
 				Players: Players{player1, player2, player3},
 			},
 			second: ServerPayload{
-				Address: ServerAddr(goqstat_server1.Address),
+				Address: IpAddr(goqstat_server1.Address),
 				Name:    goqstat_server1.Name,
 				Players: Players{player4, player2},
 			},
@@ -147,10 +147,10 @@ func TestGetServerPropertiesChanges(t *testing.T) {
 				Address: "",
 			},
 			second: ServerPayload{
-				Address: ServerAddr(goqstat_server2.Address),
+				Address: IpAddr(goqstat_server2.Address),
 			},
 			want: ServerProperties{
-				"Address": ServerAddr(goqstat_server2.Address),
+				"Address": IpAddr(goqstat_server2.Address),
 			},
 		},
 	}

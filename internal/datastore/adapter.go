@@ -24,7 +24,7 @@ func serverToData(server goqstat.Server) ServerPayload {
 		numBots = 0
 	}
 	dataMap := ServerPayload{
-		Address: ServerAddr(server.Address),
+		Address: IpAddr(server.Address),
 		Name:    server.Name,
 		Map:     server.Map,
 		Ping:    server.Ping,

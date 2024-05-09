@@ -58,7 +58,7 @@ func (e NotifierErr) Error() string {
 	return string(e)
 }
 
-type NotifyChanges map[data.ServerAddr]NotifyServerChanges
+type NotifyChanges map[data.IpAddr]NotifyServerChanges
 type NotifyServerChanges map[ConfigName]ConfigValue
 
 type ConfigName string

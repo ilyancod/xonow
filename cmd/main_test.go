@@ -141,7 +141,7 @@ players_appear test_user1 test_user2
 			}
 			test.dataStore.Clear()
 			for serverAddress := range conf.Servers {
-				test.dataStore.AddServer(datastore.ServerAddr(serverAddress), datastore.ServerPayload{})
+				test.dataStore.AddServer(datastore.IpAddr(serverAddress), datastore.ServerPayload{})
 			}
 			notificationSettings := notification.NewNotifierSettings(conf)
 

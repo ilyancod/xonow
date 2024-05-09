@@ -6,7 +6,7 @@ import (
 	"github.com/ilyancod/goqstat"
 )
 
-type ServerAddr string
+type IpAddr string
 
 type DataStore struct {
 	serverData ServerStore
@@ -38,15 +38,15 @@ func (ds *DataStore) UpdateServerData(serverData ServerStore) ServerChanges {
 	return changes
 }
 
-func (ds *DataStore) AddServer(address ServerAddr, payload ServerPayload) {
+func (ds *DataStore) AddServer(address IpAddr, payload ServerPayload) {
 	ds.serverData.Add(address, payload)
 }
 
-func (ds *DataStore) RemoveServer(address ServerAddr) {
+func (ds *DataStore) RemoveServer(address IpAddr) {
 	ds.serverData.Remove(address)
 }
 
-func (ds *DataStore) GetServer(address ServerAddr) (payload ServerPayload, found bool) {
+func (ds *DataStore) GetServer(address IpAddr) (payload ServerPayload, found bool) {
 	payload, found = ds.serverData[address]
 	return
 }

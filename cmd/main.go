@@ -36,7 +36,7 @@ func main() {
 
 	store := datastore.GetDataStore()
 	for serverAddress := range conf.Servers {
-		store.AddServer(datastore.ServerAddr(serverAddress), datastore.ServerPayload{})
+		store.AddServer(datastore.IpAddr(serverAddress), datastore.ServerPayload{})
 	}
 	notificationSettings := notification.NewNotifierSettings(conf)
 	for {
