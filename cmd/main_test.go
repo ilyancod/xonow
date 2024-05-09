@@ -2,8 +2,6 @@ package main_test
 
 import (
 	"github.com/ilyancod/goqstat"
-	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 	"testing"
@@ -12,6 +10,7 @@ import (
 	"xonow/internal/datastore"
 	data "xonow/internal/datastore"
 	"xonow/internal/notification"
+	"xonow/internal/utils"
 )
 
 const (
@@ -182,11 +181,9 @@ func assertNotifyMessageResult(t testing.TB, got, want []NotifyMessageResult) {
 }
 
 func getIconPath(t testing.TB) string {
-	workDir, err := os.Getwd()
+	iconPath, err := utils.GetIconPath()
 	if err != nil {
-		t.Fatal("error getting icon path:", err)
+		t.Fatal("fail to get icon path:", err)
 	}
-	iconDir := filepath.Join(workDir, "..")
-	iconDir = filepath.Join(iconDir, "assets")
-	return iconDir + "/xonotic.png"
+	return iconPath
 }

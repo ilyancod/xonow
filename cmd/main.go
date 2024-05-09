@@ -9,6 +9,7 @@ import (
 	"xonow/internal/config"
 	"xonow/internal/datastore"
 	"xonow/internal/notification"
+	"xonow/internal/utils"
 
 	"github.com/ilyancod/goqstat"
 )
@@ -16,12 +17,11 @@ import (
 func main() {
 	conf := config.GetConfig()
 
-	workDir, err := os.Getwd()
+	configDir, err := utils.GetConfigDir()
 	if err != nil {
-		fmt.Println("error getting work directory:", err)
+		fmt.Println("fail to get config directory:", err)
 		return
 	}
-	configDir := filepath.Join(workDir, "config")
 	fileSystem := os.DirFS(configDir)
 
 	err = conf.ReadFromFile(fileSystem, "config.json")
@@ -31,6 +31,12 @@ func main() {
 		if err != nil {
 			fmt.Println("error creating the config: ", err)
 		}
+		return
+	}
+
+	iconPath, err := utils.GetIconPath()
+	if err != nil {
+		fmt.Println("fail to get icon path:", err)
 		return
 	}
 
@@ -53,7 +59,7 @@ func main() {
 		notifyChanges := notification.NewNotifyChanges(serverChanges, notificationSettings)
 
 		notifyDesktop := &notification.NotifyDesktop{
-			IconPath: GetIconPath(workDir),
+			IconPath: iconPath,
 		}
 		formatter := notification.HTMLFormater{}
 		notifyChanges.Emit(notifyDesktop, formatter)
@@ -67,10 +73,6 @@ func GetGoqstatData(conf *config.Store) ([]goqstat.Server, error) {
 		servers = append(servers, server)
 	}
 	return goqstat.GetXonotics(servers...)
-}
-
-func GetIconPath(workDir string) string {
-	return filepath.Join(workDir, "assets", "xonotic.png")
 }
 
 func PrintCurrentData(data []goqstat.Server) {
