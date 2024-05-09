@@ -21,14 +21,13 @@ func main() {
 		fmt.Println("error getting work workDir:", err)
 		return
 	}
-	configDir := filepath.Join(workDir, "..")
-	configDir = filepath.Join(configDir, "config")
+	configDir := filepath.Join(workDir, "config")
 	fileSystem := os.DirFS(configDir)
 
 	err = conf.ReadFromFile(fileSystem, "config.json")
 	if err != nil {
 		fmt.Println("error opening the config: ", err)
-		err = conf.SaveToFile("../config/config.json")
+		err = conf.SaveToFile(filepath.Join(configDir, "config.json"))
 		if err != nil {
 			fmt.Println("error creating the config: ", err)
 		}
@@ -71,9 +70,7 @@ func GetGoqstatData(conf *config.Store) ([]goqstat.Server, error) {
 }
 
 func GetIconPath(workDir string) string {
-	iconDir := filepath.Join(workDir, "..")
-	iconDir = filepath.Join(iconDir, "assets")
-	return iconDir + "/xonotic.png"
+	return filepath.Join(workDir, "assets", "xonotic.png")
 }
 
 func PrintCurrentData(data []goqstat.Server) {
