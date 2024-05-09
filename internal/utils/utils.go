@@ -7,7 +7,7 @@ import (
 )
 
 func GetConfigDir() (string, error) {
-	workDir, err := os.Getwd()
+	workDir, err := getWorkDir()
 	if err != nil {
 		return "", fmt.Errorf("getting work directory: %s", err)
 	}
@@ -15,7 +15,7 @@ func GetConfigDir() (string, error) {
 }
 
 func GetIconPath() (string, error) {
-	workDir, err := os.Getwd()
+	workDir, err := getWorkDir()
 	if err != nil {
 		return "", fmt.Errorf("getting work directory: %s", err)
 	}
