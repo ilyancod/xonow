@@ -18,7 +18,7 @@ func main() {
 
 	workDir, err := os.Getwd()
 	if err != nil {
-		fmt.Println("error getting work workDir:", err)
+		fmt.Println("error getting work directory:", err)
 		return
 	}
 	configDir := filepath.Join(workDir, "config")
