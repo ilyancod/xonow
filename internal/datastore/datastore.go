@@ -14,17 +14,17 @@ type DataStore struct {
 
 type Players []goqstat.Player
 
-var singleDataStore *DataStore
-var lock = &sync.Mutex{}
+var (
+	singleDataStore *DataStore
+	once            sync.Once
+)
 
 func GetDataStoreSingleInstance() *DataStore {
-	if singleDataStore == nil {
-		lock.Lock()
-		defer lock.Unlock()
+	once.Do(func() {
 		singleDataStore = &DataStore{
 			serverData: make(ServerStore),
 		}
-	}
+	})
 	return singleDataStore
 }
 

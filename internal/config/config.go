@@ -29,17 +29,15 @@ type Notifications struct {
 
 var (
 	singleConfig *Store
-	lock         = &sync.Mutex{}
+	once         sync.Once
 )
 
 func GetConfigSingleInstance() *Store {
-	if singleConfig == nil {
-		lock.Lock()
-		defer lock.Unlock()
+	once.Do(func() {
 		singleConfig = &Store{
 			Servers: make(map[string]any),
 		}
-	}
+	})
 	return singleConfig
 }
 
