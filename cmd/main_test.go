@@ -10,6 +10,7 @@ import (
 	"testing/fstest"
 	"xonow/internal/config"
 	"xonow/internal/datastore"
+	data "xonow/internal/datastore"
 	"xonow/internal/notification"
 )
 
@@ -83,8 +84,8 @@ func (sn *StubNotifier) Notify(title, message string) error {
 
 type StubFormatter struct{}
 
-func (sf StubFormatter) FormatTitle(serverAddress datastore.ServerAddr) string {
-	return string(serverAddress)
+func (sf StubFormatter) FormatTitle(payload data.ServerPayload) string {
+	return string(payload.Address)
 }
 
 func (sf StubFormatter) FormatMessage(changes notification.NotifyServerChanges) string {

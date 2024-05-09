@@ -46,6 +46,11 @@ func (ds *DataStore) RemoveServer(address ServerAddr) {
 	ds.serverData.Remove(address)
 }
 
+func (ds *DataStore) GetServer(address ServerAddr) (payload ServerPayload, found bool) {
+	payload, found = ds.serverData[address]
+	return
+}
+
 func (ds *DataStore) Clear() {
 	ds.serverData = make(ServerStore)
 }

@@ -18,14 +18,14 @@ type Notifier interface {
 }
 
 type Formatter interface {
-	FormatTitle(serverAddress data.ServerAddr) string
+	FormatTitle(payload data.ServerPayload) string
 	FormatMessage(changes NotifyServerChanges) string
 }
 
 type HTMLFormater struct{}
 
-func (hm HTMLFormater) FormatTitle(serverAddress data.ServerAddr) string {
-	return "Changes on the server " + string(serverAddress)
+func (hm HTMLFormater) FormatTitle(payload data.ServerPayload) string {
+	return payload.Name
 }
 
 func (hm HTMLFormater) FormatMessage(changes NotifyServerChanges) string {
@@ -34,18 +34,20 @@ func (hm HTMLFormater) FormatMessage(changes NotifyServerChanges) string {
 		switch configName {
 		case "maps_appear":
 			{
-				result += "Map appeared: "
+				result += "Map appeared: <b>"
 			}
 		case "players_appear":
 			{
-				result += "Players appeared: "
+				result += "Players appeared: <b>"
 			}
 		case "players_disappear":
 			{
-				result += "Players disappeared: "
+				result += "Players disappeared: <b>"
 			}
+		default:
+			continue
 		}
-		result += strings.Join(configValue, ", ") + "\n"
+		result += strings.Join(configValue, ", ") + "</b>\n"
 	}
 	return result
 }
@@ -131,8 +133,13 @@ func getPlayersByNames(players data.Players, playerNames []string) (result []str
 }
 
 func (nc NotifyChanges) Emit(notifier Notifier, formatter Formatter) {
+	dataStore := data.GetDataStore()
 	for serverAddr, notifyServerChanges := range nc {
-		title := formatter.FormatTitle(serverAddr)
+		serverPayload, found := dataStore.GetServer(serverAddr)
+		if !found {
+			continue
+		}
+		title := formatter.FormatTitle(serverPayload)
 		message := formatter.FormatMessage(notifyServerChanges)
 		if message == "" {
 			continue
