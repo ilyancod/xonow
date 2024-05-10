@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ilyancod/goqstat"
+	. "github.com/ilyancod/goqstat"
 )
 
 var serverPayload1 = ServerPayload{
@@ -22,10 +22,10 @@ var serverPayload2 = ServerPayload{
 }
 
 var (
-	player1 = goqstat.Player{Name: "player1", Ping: 10}
-	player2 = goqstat.Player{Name: "player2", Ping: 20}
-	player3 = goqstat.Player{Name: "player3", Ping: 30}
-	player4 = goqstat.Player{Name: "player4", Ping: 40}
+	player1 = Player{Name: "player1", Ping: 10}
+	player2 = Player{Name: "player2", Ping: 20}
+	player3 = Player{Name: "player3", Ping: 30}
+	player4 = Player{Name: "player4", Ping: 40}
 )
 
 func TestGetServerChanges(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 	"xonow/internal/config"
-	data "xonow/internal/datastore"
+	. "xonow/internal/datastore"
 )
 
 const (
@@ -18,13 +18,13 @@ type Notifier interface {
 }
 
 type Formatter interface {
-	FormatTitle(payload data.ServerPayload) string
+	FormatTitle(payload ServerPayload) string
 	FormatMessage(changes NotifyServerChanges) string
 }
 
 type HTMLFormater struct{}
 
-func (hm HTMLFormater) FormatTitle(payload data.ServerPayload) string {
+func (hm HTMLFormater) FormatTitle(payload ServerPayload) string {
 	return payload.Name
 }
 
@@ -62,13 +62,13 @@ func (e NotifierErr) Error() string {
 	return string(e)
 }
 
-type NotifyChanges map[data.IpAddr]NotifyServerChanges
+type NotifyChanges map[IpAddr]NotifyServerChanges
 type NotifyServerChanges map[ConfigName]ConfigValue
 
 type ConfigName string
 type ConfigValue []string
 
-func NewNotifyChanges(serverChanges data.ServerChanges, settings NotifierSettings) NotifyChanges {
+func NewNotifyChanges(serverChanges ServerChanges, settings NotifierSettings) NotifyChanges {
 	notifyChanges := NotifyChanges{}
 	for serverAddr, properties := range serverChanges {
 		notifyValue := newNotifyServerChanges(properties, settings.Global)
@@ -79,7 +79,7 @@ func NewNotifyChanges(serverChanges data.ServerChanges, settings NotifierSetting
 	return notifyChanges
 }
 
-func newNotifyServerChanges(properties data.ServerProperties, notification config.Notifications) NotifyServerChanges {
+func newNotifyServerChanges(properties ServerProperties, notification config.Notifications) NotifyServerChanges {
 	result := NotifyServerChanges{}
 	for name, value := range properties {
 		switch name {
@@ -126,7 +126,7 @@ func getMapsAppear(value any, mapsAppear []string) (result []string, found bool)
 	return
 }
 
-func getPlayersByNames(players data.Players, playerNames []string) (result []string, found bool) {
+func getPlayersByNames(players Players, playerNames []string) (result []string, found bool) {
 	found = false
 	result = []string{}
 
@@ -141,12 +141,12 @@ func getPlayersByNames(players data.Players, playerNames []string) (result []str
 	return
 }
 
-func isAnyPlayersInEmptyServer(playersCount data.PlayersCountChanges) bool {
+func isAnyPlayersInEmptyServer(playersCount PlayersCountChanges) bool {
 	return playersCount.Was == 0 && playersCount.Become != 0
 }
 
 func (nc NotifyChanges) Emit(notifier Notifier, formatter Formatter) {
-	dataStore := data.GetDataStoreSingleInstance()
+	dataStore := GetDataStoreSingleInstance()
 	for serverAddr, notifyServerChanges := range nc {
 		serverPayload, found := dataStore.GetServer(serverAddr)
 		if !found {
@@ -172,8 +172,8 @@ func interfaceToString(value any) (string, error) {
 	return reflectValue.String(), nil
 }
 
-func interfaceToPlayersChanges(value any) (data.PlayersChanges, error) {
-	if playersChanges, ok := value.(data.PlayersChanges); ok {
+func interfaceToPlayersChanges(value any) (PlayersChanges, error) {
+	if playersChanges, ok := value.(PlayersChanges); ok {
 		return playersChanges, nil
 	} else {
 		return playersChanges, ErrInterfaceNoPlayersChanges

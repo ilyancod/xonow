@@ -3,46 +3,46 @@ package datastore_test
 import (
 	"reflect"
 	"testing"
-	data "xonow/internal/datastore"
+	. "xonow/internal/datastore"
 )
 
 func TestUpdateServerData(t *testing.T) {
 	cases := []struct {
 		name    string
-		servers []data.ServerPayload
-		input   data.ServerStore
-		want    data.ServerChanges
+		servers []ServerPayload
+		input   ServerStore
+		want    ServerChanges
 	}{
 		{
 			name:    "empty DataStore",
-			servers: []data.ServerPayload{},
-			input: data.ServerStore{
-				"149.202.87.185:26010": data.ServerPayload{
-					Address: data.IpAddr("149.202.87.185:26010"),
+			servers: []ServerPayload{},
+			input: ServerStore{
+				"149.202.87.185:26010": ServerPayload{
+					Address: IpAddr("149.202.87.185:26010"),
 					Name:    "test_name",
 					Map:     "test_map",
 					Ping:    50,
 				},
 			},
-			want: data.ServerChanges{},
+			want: ServerChanges{},
 		},
 		{
 			name: "DataStore with empty payload",
-			servers: []data.ServerPayload{
+			servers: []ServerPayload{
 				{
 					Address: "149.202.87.185:26010",
 				},
 			},
-			input: data.ServerStore{
-				"149.202.87.185:26010": data.ServerPayload{
-					Address: data.IpAddr("149.202.87.185:26010"),
+			input: ServerStore{
+				"149.202.87.185:26010": ServerPayload{
+					Address: IpAddr("149.202.87.185:26010"),
 					Name:    "test_name",
 					Map:     "test_map",
 					Ping:    50,
 				},
 			},
-			want: data.ServerChanges{
-				"149.202.87.185:26010": data.ServerProperties{
+			want: ServerChanges{
+				"149.202.87.185:26010": ServerProperties{
 					"Name": "test_name",
 					"Map":  "test_map",
 					"Ping": 50,
@@ -51,24 +51,24 @@ func TestUpdateServerData(t *testing.T) {
 		},
 		{
 			name: "empty DataStore",
-			servers: []data.ServerPayload{
+			servers: []ServerPayload{
 				{
-					Address: data.IpAddr("149.202.87.185:26010"),
+					Address: IpAddr("149.202.87.185:26010"),
 					Name:    "test_name1",
 					Map:     "test_map1",
 					Ping:    45,
 				},
 			},
-			input: data.ServerStore{
-				"149.202.87.185:26010": data.ServerPayload{
-					Address: data.IpAddr("149.202.87.185:26010"),
+			input: ServerStore{
+				"149.202.87.185:26010": ServerPayload{
+					Address: IpAddr("149.202.87.185:26010"),
 					Name:    "test_name2",
 					Map:     "test_map2",
 					Ping:    50,
 				},
 			},
-			want: data.ServerChanges{
-				"149.202.87.185:26010": data.ServerProperties{
+			want: ServerChanges{
+				"149.202.87.185:26010": ServerProperties{
 					"Name": "test_name2",
 					"Map":  "test_map2",
 					"Ping": 50,
@@ -79,7 +79,7 @@ func TestUpdateServerData(t *testing.T) {
 
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
-			dataStore := data.GetDataStoreSingleInstance()
+			dataStore := GetDataStoreSingleInstance()
 			for _, server := range test.servers {
 				dataStore.AddServer(server.Address, server)
 			}

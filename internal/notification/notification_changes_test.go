@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 	"xonow/internal/config"
-	data "xonow/internal/datastore"
+	. "xonow/internal/datastore"
 )
 
 var (
@@ -20,10 +20,10 @@ var (
 func TestNewNotifyChanges(t *testing.T) {
 	notifierSettings := NewNotifierSettings(config.GetConfigSingleInstance())
 	t.Run("empty changes", func(t *testing.T) {
-		got := NewNotifyChanges(data.ServerChanges{}, notifierSettings)
+		got := NewNotifyChanges(ServerChanges{}, notifierSettings)
 		assertLen(t, len(got), 0)
-		got = NewNotifyChanges(data.ServerChanges{
-			"address": data.ServerProperties{},
+		got = NewNotifyChanges(ServerChanges{
+			"address": ServerProperties{},
 		}, notifierSettings)
 		assertLen(t, len(got), 0)
 	})
@@ -31,57 +31,57 @@ func TestNewNotifyChanges(t *testing.T) {
 
 func TestNewNotifyServerChanges(t *testing.T) {
 	var (
-		playersChanges = data.PlayersChanges{
+		playersChanges = PlayersChanges{
 			Added:   []goqstat.Player{userAppear1, userAppear2},
 			Removed: []goqstat.Player{userDisappear1, userDisappear2},
-			Count:   data.PlayersCountChanges{Was: 2, Become: 2},
+			Count:   PlayersCountChanges{Was: 2, Become: 2},
 		}
-		playersChangesMismatch = data.PlayersChanges{
+		playersChangesMismatch = PlayersChanges{
 			Added:   []goqstat.Player{userMismatch1},
 			Removed: []goqstat.Player{userMismatch2},
-			Count:   data.PlayersCountChanges{Was: 2, Become: 2},
+			Count:   PlayersCountChanges{Was: 2, Become: 2},
 		}
-		playersAppearInEmptyServer = data.PlayersChanges{
+		playersAppearInEmptyServer = PlayersChanges{
 			Added:   []goqstat.Player{userMismatch1},
 			Removed: []goqstat.Player{},
-			Count:   data.PlayersCountChanges{Was: 0, Become: 1},
+			Count:   PlayersCountChanges{Was: 0, Become: 1},
 		}
 	)
 	var (
-		propertiesMismatch = data.ServerProperties{
+		propertiesMismatch = ServerProperties{
 			"Map":     "test_map",
 			"Players": playersChangesMismatch,
 			"Ping":    50,
 			"Bots":    3,
 			"Name":    "test_name",
 		}
-		propertiesMapAndPing = data.ServerProperties{
+		propertiesMapAndPing = ServerProperties{
 			"Map":  "mars",
 			"Ping": 50,
 		}
-		propertiesPlayers = data.ServerProperties{
+		propertiesPlayers = ServerProperties{
 			"Players": playersChanges,
 			"Ping":    50,
 		}
-		propertiesPlayersAndMap = data.ServerProperties{
+		propertiesPlayersAndMap = ServerProperties{
 			"Map":     "mars",
 			"Players": playersChanges,
 			"Ping":    50,
 		}
-		propertiesPlayersInEmptyServer = data.ServerProperties{
+		propertiesPlayersInEmptyServer = ServerProperties{
 			"Players": playersAppearInEmptyServer,
 			"Ping":    50,
 		}
 	)
 	cases := []struct {
 		name       string
-		properties data.ServerProperties
+		properties ServerProperties
 		config     config.Notifications
 		want       NotifyServerChanges
 	}{
 		{
 			name:       "empty ServerProperties and Notify config",
-			properties: data.ServerProperties{},
+			properties: ServerProperties{},
 			config:     config.Notifications{},
 			want:       NotifyServerChanges{},
 		},
