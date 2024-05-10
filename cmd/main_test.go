@@ -61,9 +61,28 @@ var goqstat_server1 = goqstat.Server{
 	Players:       datastore.Players{player1, player2},
 }
 
+var goqstat_server2 = goqstat.Server{
+	Protocol:      "xonotics",
+	Address:       "149.202.87.185:26010",
+	Status:        "online",
+	Hostname:      "149.202.87.185:26010",
+	Name:          "[E] TheRegulars B6  Instagib Server [git]",
+	Gametype:      "Xonotic",
+	Map:           "mismatch_map",
+	Numplayers:    1,
+	Maxplayers:    48,
+	Numspectators: 0,
+	Maxspectators: 0,
+	Ping:          53,
+	Retries:       0,
+	Rules:         goqstat.Rules{Bots: "0"},
+	Players:       datastore.Players{mismatchPlayer},
+}
+
 var (
-	player1 = goqstat.Player{Name: "test_user1", Ping: 10}
-	player2 = goqstat.Player{Name: "test_user2", Ping: 20}
+	player1        = goqstat.Player{Name: "test_user1", Ping: 10}
+	player2        = goqstat.Player{Name: "test_user2", Ping: 20}
+	mismatchPlayer = goqstat.Player{Name: "mismatch_player", Ping: 30}
 )
 
 type StubNotifier struct {
@@ -97,7 +116,7 @@ func (sf StubFormatter) FormatMessage(changes notification.NotifyServerChanges) 
 	sort.Strings(keys)
 	for _, configName := range keys {
 		configValue := changes[notification.ConfigName(configName)]
-		result += string(configName) + " " + strings.Join(configValue, " ") + "\n"
+		result += string(configName) + ": " + strings.Join(configValue, " ") + "\n"
 	}
 
 	return result
@@ -121,8 +140,22 @@ func TestNotification(t *testing.T) {
 			want: []NotifyMessageResult{
 				{
 					Title: "149.202.87.185:26010",
-					Message: `maps_appear snooker
-players_appear test_user1 test_user2
+					Message: `maps_appear: snooker
+players_appear: test_user1 test_user2
+`,
+				},
+			},
+			notifyDesktop: true,
+		},
+		{
+			name:       "any players appeared in empty server",
+			configName: "config.json",
+			dataStore:  datastore.GetDataStoreSingleInstance(),
+			newData:    []goqstat.Server{goqstat_server2},
+			want: []NotifyMessageResult{
+				{
+					Title: "149.202.87.185:26010",
+					Message: `any_player_appear_in_empty_server: mismatch_player
 `,
 				},
 			},

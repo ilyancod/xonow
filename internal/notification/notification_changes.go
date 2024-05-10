@@ -44,6 +44,10 @@ func (hm HTMLFormater) FormatMessage(changes NotifyServerChanges) string {
 			{
 				result += "Players disappeared: <b>"
 			}
+		case "any_player_appear_in_empty_server":
+			{
+				result += "Players appeared in empty server: <b>"
+			}
 		default:
 			continue
 		}
@@ -99,6 +103,11 @@ func newNotifyServerChanges(properties data.ServerProperties, notification confi
 			if found {
 				result["players_disappear"] = playersDisappear
 			}
+
+			found = isAnyPlayersInEmptyServer(playersChanges.Count)
+			if found && len(playersAppear) == 0 {
+				result["any_player_appear_in_empty_server"] = playersChanges.Added.GetNames()
+			}
 		}
 	}
 
@@ -130,6 +139,10 @@ func getPlayersByNames(players data.Players, playerNames []string) (result []str
 		found = true
 	}
 	return
+}
+
+func isAnyPlayersInEmptyServer(playersCount data.PlayersCountChanges) bool {
+	return playersCount.Was == 0 && playersCount.Become != 0
 }
 
 func (nc NotifyChanges) Emit(notifier Notifier, formatter Formatter) {

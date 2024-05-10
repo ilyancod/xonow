@@ -14,6 +14,13 @@ type DataStore struct {
 
 type Players []goqstat.Player
 
+func (p Players) GetNames() (result []string) {
+	for _, player := range p {
+		result = append(result, player.Name)
+	}
+	return result
+}
+
 var (
 	singleDataStore *DataStore
 	once            sync.Once

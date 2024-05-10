@@ -138,6 +138,7 @@ func TestGetServerPropertiesChanges(t *testing.T) {
 				"Players": PlayersChanges{
 					Added:   Players{player4},
 					Removed: Players{player1, player3},
+					Count:   PlayersCountChanges{3, 2},
 				},
 			},
 		},
@@ -174,13 +175,13 @@ func TestGetChangesPlayers(t *testing.T) {
 			name:   "empty Players",
 			first:  Players{},
 			second: Players{},
-			want:   PlayersChanges{Players{}, Players{}},
+			want:   PlayersChanges{Players{}, Players{}, PlayersCountChanges{}},
 		},
 		{
 			name:   "equal Players",
 			first:  Players{player1, player2},
 			second: Players{player1, player2},
-			want:   PlayersChanges{Players{}, Players{}},
+			want:   PlayersChanges{Players{}, Players{}, PlayersCountChanges{2, 2}},
 		},
 		{
 			name:   "changed Players",
@@ -189,6 +190,7 @@ func TestGetChangesPlayers(t *testing.T) {
 			want: PlayersChanges{
 				Added:   Players{player3, player4},
 				Removed: Players{player1},
+				Count:   PlayersCountChanges{2, 3},
 			},
 		},
 	}

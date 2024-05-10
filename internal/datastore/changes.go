@@ -10,6 +10,11 @@ type ServerProperties map[PropertyName]interface{}
 type PlayersChanges struct {
 	Added   Players
 	Removed Players
+	Count   PlayersCountChanges
+}
+type PlayersCountChanges struct {
+	Was    int
+	Become int
 }
 
 func getServerChanges(first, second ServerStore) ServerChanges {
@@ -47,10 +52,10 @@ func getServerPropertiesChanges(first, second ServerPayload) ServerProperties {
 func getAnyPropertyChanges(propertyName PropertyName, firstValue, secondValue any) (any, bool) {
 	if propertyName == "Players" {
 		playersChanges := getPlayersChanges(firstValue.(Players), secondValue.(Players))
-		if !playersChanges.Empty() {
-			return playersChanges, true
+		if playersChanges.Empty() {
+			return nil, false
 		}
-		return nil, false
+		return playersChanges, true
 	}
 	if firstValue != secondValue {
 		return secondValue, true
@@ -59,7 +64,7 @@ func getAnyPropertyChanges(propertyName PropertyName, firstValue, secondValue an
 }
 
 func getPlayersChanges(first, second Players) PlayersChanges {
-	changes := PlayersChanges{Players{}, Players{}}
+	changes := PlayersChanges{Players{}, Players{}, PlayersCountChanges{}}
 	for _, player := range first {
 		if !second.ContainsName(player.Name) {
 			changes.Removed = append(changes.Removed, player)
@@ -70,6 +75,8 @@ func getPlayersChanges(first, second Players) PlayersChanges {
 			changes.Added = append(changes.Added, player)
 		}
 	}
+	changes.Count.Was = len(first)
+	changes.Count.Become = len(second)
 	return changes
 }
 

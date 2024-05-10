@@ -34,10 +34,17 @@ func TestNewNotifyServerChanges(t *testing.T) {
 		playersChanges = data.PlayersChanges{
 			Added:   []goqstat.Player{userAppear1, userAppear2},
 			Removed: []goqstat.Player{userDisappear1, userDisappear2},
+			Count:   data.PlayersCountChanges{Was: 2, Become: 2},
 		}
 		playersChangesMismatch = data.PlayersChanges{
 			Added:   []goqstat.Player{userMismatch1},
 			Removed: []goqstat.Player{userMismatch2},
+			Count:   data.PlayersCountChanges{Was: 2, Become: 2},
+		}
+		playersAppearInEmptyServer = data.PlayersChanges{
+			Added:   []goqstat.Player{userMismatch1},
+			Removed: []goqstat.Player{},
+			Count:   data.PlayersCountChanges{Was: 0, Become: 1},
 		}
 	)
 	var (
@@ -59,6 +66,10 @@ func TestNewNotifyServerChanges(t *testing.T) {
 		propertiesPlayersAndMap = data.ServerProperties{
 			"Map":     "mars",
 			"Players": playersChanges,
+			"Ping":    50,
+		}
+		propertiesPlayersInEmptyServer = data.ServerProperties{
+			"Players": playersAppearInEmptyServer,
 			"Ping":    50,
 		}
 	)
@@ -111,6 +122,14 @@ func TestNewNotifyServerChanges(t *testing.T) {
 				"maps_appear":       []string{"mars"},
 				"players_appear":    []string{"user_appear1", "user_appear2"},
 				"players_disappear": []string{"user_disappear1", "user_disappear2"},
+			},
+		},
+		{
+			name:       "any player appear in empty server",
+			properties: propertiesPlayersInEmptyServer,
+			config:     notifConfig,
+			want: NotifyServerChanges{
+				"any_player_appear_in_empty_server": []string{"user_mismatch1"},
 			},
 		},
 	}
