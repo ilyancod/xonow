@@ -85,7 +85,7 @@ var (
 	mismatchPlayer = goqstat.Player{Name: "mismatch_player", Ping: 30}
 )
 
-type StubNotifier struct {
+type SpyNotifier struct {
 	Result    string
 	Notifiers []NotifyMessageResult
 }
@@ -95,7 +95,7 @@ type NotifyMessageResult struct {
 	Message string
 }
 
-func (sn *StubNotifier) Notify(title, message string) error {
+func (sn *SpyNotifier) Notify(title, message string) error {
 	sn.Notifiers = append(sn.Notifiers, NotifyMessageResult{title, message})
 	return nil
 }
@@ -180,7 +180,7 @@ players_appear: test_user1 test_user2
 			serverData := datastore.GoqstatToDataServers(&test.newData)
 			serverChanges := test.dataStore.UpdateServerData(serverData)
 			notifyChanges := notification.NewNotifyChanges(serverChanges, notificationSettings)
-			stubNotifier := StubNotifier{}
+			stubNotifier := SpyNotifier{}
 			stubFormatter := StubFormatter{}
 			notifyChanges.Emit(&stubNotifier, stubFormatter)
 
